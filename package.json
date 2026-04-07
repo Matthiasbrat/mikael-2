@@ -1,0 +1,12 @@
+{
+  "name": "mikaels-gallery",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mikael's Gallery — static showcase site",
+  "scripts": {
+    "lighthouse": "lhci autorun"
+  },
+  "devDependencies": {
+    "@lhci/cli": "^0.14.0"
+  }
+}
