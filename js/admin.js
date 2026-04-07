@@ -1,4 +1,6 @@
-// Simple prototype admin — password stored in plain text for demo only.
+// Prototype admin: password is in plain text — for demo only.
+// For production, gate this behind real auth on a backend.
+
 const ADMIN_PASSWORD = 'mikael2026';
 const SESSION_KEY = 'mikael_admin_session';
 
@@ -17,6 +19,11 @@ async function init() {
   document.getElementById('cancel-btn').addEventListener('click', closeModal);
   document.getElementById('art-form').addEventListener('submit', saveArt);
   document.getElementById('f-upload').addEventListener('change', handleUpload);
+  document.getElementById('logout-btn').addEventListener('click', logout);
+  document.getElementById('reset-btn').addEventListener('click', reset);
+  document.getElementById('modal').addEventListener('click', e => {
+    if (e.target.id === 'modal') closeModal();
+  });
 }
 
 function login() {
@@ -27,6 +34,20 @@ function login() {
   } else {
     showToast('Mot de passe incorrect');
   }
+}
+
+function logout() {
+  sessionStorage.removeItem(SESSION_KEY);
+  window.location.reload();
+}
+
+async function reset() {
+  if (!confirm('Réinitialiser les œuvres avec les données de démo ? Vos modifications seront perdues.')) return;
+  resetArtworks();
+  artworks = await loadArtworks();
+  renderStats();
+  renderTable();
+  showToast('Données réinitialisées');
 }
 
 async function showAdmin() {
@@ -52,16 +73,16 @@ function renderStats() {
 function renderTable() {
   const rows = artworks.map(a => `
     <tr>
-      <td><img src="${a.image}" alt="" /></td>
-      <td>${a.title}</td>
-      <td>${a.category}</td>
+      <td><img src="${escapeHtml(a.image)}" alt="" /></td>
+      <td>${escapeHtml(a.title)}</td>
+      <td>${escapeHtml(a.category)}</td>
       <td>${formatPrice(a.price)}</td>
       <td>${a.status === 'available' ? 'Disponible' : 'Vendue'}</td>
       <td>${a.sales || 0}</td>
       <td>
         <div class="admin-actions">
-          <button class="icon-btn" data-edit="${a.id}">Modifier</button>
-          <button class="icon-btn danger" data-del="${a.id}">Supprimer</button>
+          <button class="icon-btn" data-edit="${escapeHtml(a.id)}">Modifier</button>
+          <button class="icon-btn danger" data-del="${escapeHtml(a.id)}">Supprimer</button>
         </div>
       </td>
     </tr>
@@ -78,7 +99,7 @@ function renderTable() {
 
 function openModal(id) {
   const art = id ? artworks.find(a => a.id === id) : null;
-  document.getElementById('modal-title').textContent = art ? 'Modifier l\'œuvre' : 'Nouvelle œuvre';
+  document.getElementById('modal-title').textContent = art ? "Modifier l'œuvre" : 'Nouvelle œuvre';
   document.getElementById('f-id').value = art?.id || '';
   document.getElementById('f-title').value = art?.title || '';
   document.getElementById('f-description').value = art?.description || '';
@@ -128,7 +149,7 @@ function saveArt(e) {
     status: document.getElementById('f-status').value,
     tags,
     sales: 0,
-    createdAt: new Date().toISOString().slice(0, 10)
+    createdAt: new Date().toISOString().slice(0, 10),
   };
 
   if (id) {

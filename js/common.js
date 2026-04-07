@@ -1,26 +1,29 @@
-// Shared utilities, data loading, cart management
+// Shared utilities: data loading, cart, formatting, toast.
+// Pure functions exposed on window for use across pages.
+
 const STORAGE_CART = 'mikael_cart';
 const STORAGE_ARTWORKS = 'mikael_artworks';
 
+// Returns artworks. Async signature kept so future API swaps don't ripple.
 async function loadArtworks() {
-  // Prefer admin-edited data in localStorage if present
   const local = localStorage.getItem(STORAGE_ARTWORKS);
   if (local) {
-    try { return JSON.parse(local); } catch (e) { /* fall through */ }
+    try { return JSON.parse(local); } catch (_) { /* fall through to seed */ }
   }
-  const res = await fetch('data/artworks.json');
-  const data = await res.json();
-  return data;
+  return Array.isArray(window.ARTWORKS) ? window.ARTWORKS.slice() : [];
 }
 
 function saveArtworks(list) {
   localStorage.setItem(STORAGE_ARTWORKS, JSON.stringify(list));
 }
 
+function resetArtworks() {
+  localStorage.removeItem(STORAGE_ARTWORKS);
+}
+
 function getCart() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_CART)) || [];
-  } catch (e) { return []; }
+  try { return JSON.parse(localStorage.getItem(STORAGE_CART)) || []; }
+  catch (_) { return []; }
 }
 
 function setCart(cart) {
@@ -28,15 +31,21 @@ function setCart(cart) {
   updateCartBadge();
 }
 
+function clearCart() {
+  localStorage.removeItem(STORAGE_CART);
+  updateCartBadge();
+}
+
 function addToCart(id) {
   const cart = getCart();
-  if (!cart.includes(id)) {
-    cart.push(id);
-    setCart(cart);
-    showToast('Œuvre ajoutée au panier');
-  } else {
+  if (cart.includes(id)) {
     showToast('Cette œuvre est déjà dans votre panier');
+    return;
   }
+  cart.push(id);
+  setCart(cart);
+  showToast('Œuvre ajoutée au panier');
+  bounceCartBadge();
 }
 
 function removeFromCart(id) {
@@ -52,8 +61,21 @@ function updateCartBadge() {
   });
 }
 
+function bounceCartBadge() {
+  document.querySelectorAll('.cart-badge').forEach(b => {
+    b.classList.remove('bounce');
+    // force reflow so the animation can restart
+    void b.offsetWidth;
+    b.classList.add('bounce');
+  });
+}
+
 function formatPrice(p) {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(p);
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(p);
 }
 
 function showToast(msg) {
@@ -69,4 +91,9 @@ function showToast(msg) {
   t._timer = setTimeout(() => t.classList.remove('show'), 2400);
 }
 
-document.addEventListener('DOMContentLoaded', updateCartBadge);
+// Minimal HTML escape for any user-supplied text we render via innerHTML.
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}

@@ -1,4 +1,11 @@
-// Stripe Checkout config — replace with your real public key & price IDs in production.
+// Cart page: list, total, Stripe Checkout (with demo fallback to success.html).
+//
+// To enable real Stripe Checkout:
+//   1. Create products & Prices in your Stripe Dashboard, store the price IDs in artworks.
+//   2. Set STRIPE_PUBLIC_KEY below to your `pk_live_…` (or `pk_test_…`).
+//   3. Add <script src="https://js.stripe.com/v3/"></script> to cart.html.
+//   4. Uncomment the real `redirectToCheckout` block below.
+
 const STRIPE_PUBLIC_KEY = 'pk_test_REPLACE_ME';
 
 async function init() {
@@ -24,13 +31,15 @@ async function init() {
       <div class="cart-list">
         ${items.map(a => `
           <div class="cart-item">
-            <img src="${a.image}" alt="${a.title}" />
+            <a href="artwork.html?id=${escapeHtml(a.id)}">
+              <img src="${escapeHtml(a.image)}" alt="${escapeHtml(a.title)}" />
+            </a>
             <div>
-              <h3>${a.title}</h3>
-              <div class="meta">${a.dimensions} · ${a.technique}</div>
+              <h3><a href="artwork.html?id=${escapeHtml(a.id)}">${escapeHtml(a.title)}</a></h3>
+              <div class="meta">${escapeHtml(a.dimensions)} · ${escapeHtml(a.technique)}</div>
             </div>
             <div class="price">${formatPrice(a.price)}</div>
-            <button class="remove-btn" data-id="${a.id}">Retirer</button>
+            <button class="remove-btn" data-id="${escapeHtml(a.id)}" aria-label="Retirer">Retirer</button>
           </div>
         `).join('')}
       </div>
@@ -39,6 +48,7 @@ async function init() {
         <div class="row"><span>Livraison</span><span>Offerte</span></div>
         <div class="row total"><span>Total</span><span>${formatPrice(total)}</span></div>
         <button class="btn" id="checkout">Payer avec Stripe</button>
+        <p class="cart-note">Paiement sécurisé via Stripe. Mode démo activé sur ce prototype.</p>
       </div>
     `;
 
@@ -53,12 +63,12 @@ async function init() {
   }
 
   function checkout(items) {
-    // Client-only Stripe Checkout — requires real lineItems with Price IDs created in Stripe Dashboard.
     if (STRIPE_PUBLIC_KEY.includes('REPLACE_ME')) {
-      showToast('Stripe non configuré (clé de test manquante)');
+      // Demo: simulate a successful checkout end-to-end.
+      window.location.href = 'success.html?demo=1';
       return;
     }
-    // Real implementation:
+    // Real Stripe (uncomment after configuring):
     // const stripe = Stripe(STRIPE_PUBLIC_KEY);
     // stripe.redirectToCheckout({
     //   lineItems: items.map(a => ({ price: a.stripePriceId, quantity: 1 })),

@@ -4,23 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin — Mikael's Gallery</title>
+  <meta name="robots" content="noindex" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23161628'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Georgia,serif' font-size='34' font-weight='600' fill='%23fff'%3EM%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <header class="site-header">
-    <div class="header-inner">
-      <a href="index.html" class="brand">Mikael's Gallery</a>
-      <nav class="nav">
-        <a href="index.html">Galerie</a>
-        <a href="about.html">À propos</a>
-        <a href="contact.html">Contact</a>
-        <a href="admin.html" class="active">Admin</a>
-      </nav>
-    </div>
-  </header>
+  <div id="site-header"></div>
 
   <main class="container">
     <div id="login-view" class="admin-login">
@@ -32,7 +24,13 @@
     </div>
 
     <section id="admin-view" class="admin-page" style="display:none;">
-      <h1 style="font-size:2.2rem;margin-bottom:1.5rem;">Tableau de bord</h1>
+      <div class="admin-header">
+        <h1>Tableau de bord</h1>
+        <div class="admin-header-actions">
+          <button class="btn btn-secondary" id="reset-btn">Réinitialiser</button>
+          <button class="btn btn-secondary" id="logout-btn">Déconnexion</button>
+        </div>
+      </div>
 
       <div class="admin-stats" id="stats"></div>
 
@@ -101,11 +99,11 @@
     </div>
   </main>
 
-  <footer class="site-footer">
-    <p>© 2026 Mikael's Gallery — Tous droits réservés</p>
-  </footer>
+  <div id="site-footer"></div>
 
+  <script src="data/artworks.js"></script>
   <script src="js/common.js"></script>
+  <script src="js/layout.js"></script>
   <script src="js/admin.js"></script>
 </body>
 </html>

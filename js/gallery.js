@@ -1,10 +1,13 @@
+// Gallery page: hero featured artwork + masonry grid with filters & sort.
+
 let allArtworks = [];
 let currentCat = 'all';
 let currentSort = 'recent';
 
 async function init() {
   allArtworks = await loadArtworks();
-  render();
+  renderHero();
+  render(false);
 
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -21,7 +24,28 @@ async function init() {
   });
 }
 
-function render() {
+function renderHero() {
+  const slot = document.getElementById('hero-featured');
+  if (!slot) return;
+  // Pick a best-seller; fallback to most expensive available work.
+  const featured = [...allArtworks]
+    .filter(a => a.status === 'available')
+    .sort((a, b) => (b.sales || 0) - (a.sales || 0) || b.price - a.price)[0];
+  if (!featured) return;
+
+  slot.innerHTML = `
+    <a class="hero-featured" href="artwork.html?id=${escapeHtml(featured.id)}">
+      <img src="${escapeHtml(featured.image)}" alt="${escapeHtml(featured.title)}" />
+      <div class="hero-featured-label">
+        <span>Œuvre mise en avant</span>
+        <strong>${escapeHtml(featured.title)}</strong>
+        <em>${formatPrice(featured.price)}</em>
+      </div>
+    </a>
+  `;
+}
+
+function render(animate = true) {
   const gallery = document.getElementById('gallery');
   let list = allArtworks.filter(a => currentCat === 'all' || a.category === currentCat);
 
@@ -32,19 +56,37 @@ function render() {
     case 'recent':     list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); break;
   }
 
-  gallery.innerHTML = list.map((a, i) => `
-    <a class="card" href="artwork.html?id=${a.id}" style="animation-delay:${i * 40}ms">
-      <div class="card-badges">
-        ${(a.tags || []).includes('nouveau') ? '<span class="badge">Nouveau</span>' : ''}
-        ${(a.tags || []).includes('best-seller') ? '<span class="badge bestseller">Best-seller</span>' : ''}
-      </div>
-      <img src="${a.image}" alt="${a.title}" loading="lazy" />
+  const html = list.length
+    ? list.map((a, i) => cardHTML(a, i)).join('')
+    : `<p class="empty-state" style="column-span:all;">Aucune œuvre dans cette catégorie.</p>`;
+
+  if (animate) {
+    gallery.classList.add('fading');
+    setTimeout(() => {
+      gallery.innerHTML = html;
+      gallery.classList.remove('fading');
+    }, 180);
+  } else {
+    gallery.innerHTML = html;
+  }
+}
+
+function cardHTML(a, i) {
+  const tags = a.tags || [];
+  const badges = `
+    ${tags.includes('nouveau') ? '<span class="badge">Nouveau</span>' : ''}
+    ${tags.includes('best-seller') ? '<span class="badge bestseller">Best-seller</span>' : ''}
+  `;
+  return `
+    <a class="card" href="artwork.html?id=${escapeHtml(a.id)}" style="animation-delay:${i * 40}ms">
+      <div class="card-badges">${badges}</div>
+      <img src="${escapeHtml(a.image)}" alt="${escapeHtml(a.title)}" loading="lazy" />
       <div class="card-info">
-        <h3>${a.title}</h3>
+        <h3>${escapeHtml(a.title)}</h3>
         <span class="price">${formatPrice(a.price)}</span>
       </div>
     </a>
-  `).join('');
+  `;
 }
 
 init();
