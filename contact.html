@@ -48,11 +48,11 @@
         </form>
 
         <aside class="contact-info">
-          <h3>Studio</h3>
+          <h2>Studio</h2>
           <p>14 rue des Lumières<br />75011 Paris, France</p>
           <p><a href="mailto:hello@mikaelsgallery.art">hello@mikaelsgallery.art</a></p>
           <p>+33 (0)1 23 45 67 89</p>
-          <h3 style="margin-top:1.5rem;">Réseaux</h3>
+          <h2>Réseaux</h2>
           <p><a href="#">Instagram</a> · <a href="#">Behance</a> · <a href="#">Vimeo</a></p>
         </aside>
       </div>
@@ -64,17 +64,6 @@
   <script src="data/artworks.js"></script>
   <script src="js/common.js"></script>
   <script src="js/layout.js"></script>
-  <script>
-    document.getElementById('contact-form').addEventListener('submit', e => {
-      e.preventDefault();
-      const f = e.target;
-      if (!f.name.value || !f.email.value || !f.message.value) {
-        showToast('Merci de remplir tous les champs.');
-        return;
-      }
-      showToast('Message envoyé. Merci !');
-      f.reset();
-    });
-  </script>
+  <script src="js/contact.js"></script>
 </body>
 </html>

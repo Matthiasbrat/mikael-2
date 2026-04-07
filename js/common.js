@@ -1,10 +1,8 @@
-// Shared utilities: data loading, cart, formatting, toast.
-// Pure functions exposed on window for use across pages.
+// Shared utilities: data loading, cart, formatting, toast, shared render helpers.
 
 const STORAGE_CART = 'mikael_cart';
 const STORAGE_ARTWORKS = 'mikael_artworks';
 
-// Returns artworks. Async signature kept so future API swaps don't ripple.
 async function loadArtworks() {
   const local = localStorage.getItem(STORAGE_ARTWORKS);
   if (local) {
@@ -70,12 +68,16 @@ function bounceCartBadge() {
   });
 }
 
+// Hoisted formatter — constructing a new Intl.NumberFormat on every call is
+// expensive when rendering dozens of cards.
+const PRICE_FORMATTER = new Intl.NumberFormat('fr-FR', {
+  style: 'currency',
+  currency: 'EUR',
+  maximumFractionDigits: 0,
+});
+
 function formatPrice(p) {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR',
-    maximumFractionDigits: 0,
-  }).format(p);
+  return PRICE_FORMATTER.format(p);
 }
 
 function showToast(msg) {
@@ -113,4 +115,36 @@ function imageSquare(imageUrl, size) {
   const m = String(imageUrl).match(/^(https:\/\/picsum\.photos\/seed\/[^/]+)\//);
   if (!m) return { url: imageUrl, width: size, height: size };
   return { url: `${m[1]}/${size}/${size}`, width: size, height: size };
+}
+
+// Shared presentation helpers — single source of truth for card rendering so
+// gallery cards and "similar artworks" cards stay visually identical.
+
+function artworkHref(id) {
+  return `artwork.html?id=${encodeURIComponent(id)}`;
+}
+
+function badgesHTML(tags) {
+  if (!tags || !tags.length) return '';
+  const parts = [];
+  if (tags.includes('nouveau')) parts.push('<span class="badge">Nouveau</span>');
+  if (tags.includes('best-seller')) parts.push('<span class="badge bestseller">Best-seller</span>');
+  return parts.join('');
+}
+
+function cardHTML(a, index = 0, opts = {}) {
+  const { width = 600 } = opts;
+  const img = imageAt(a.image, width);
+  return `
+    <a class="card" href="${artworkHref(a.id)}" style="animation-delay:${index * 40}ms">
+      <div class="card-badges">${badgesHTML(a.tags)}</div>
+      <img src="${escapeHtml(img.url)}" alt="${escapeHtml(a.title)}"
+           width="${img.width}" height="${img.height}"
+           loading="lazy" decoding="async" />
+      <div class="card-info">
+        <span class="card-title">${escapeHtml(a.title)}</span>
+        <span class="price">${formatPrice(a.price)}</span>
+      </div>
+    </a>
+  `;
 }

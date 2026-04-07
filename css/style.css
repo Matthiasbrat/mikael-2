@@ -63,6 +63,37 @@ input, textarea, select {
   border-radius: 4px;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 1001;
+  background: var(--text);
+  color: #fff;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: top 200ms ease;
+}
+.skip-link:focus {
+  top: 1rem;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
 /* ---------- Layout ---------- */
 .container {
   max-width: 1280px;
@@ -266,9 +297,7 @@ main { padding-bottom: 6rem; }
   bottom: 1.25rem;
   left: 1.25rem;
   right: 1.25rem;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
   padding: 1rem 1.25rem;
   border-radius: 12px;
   display: grid;
@@ -298,12 +327,10 @@ main { padding-bottom: 6rem; }
   gap: 0.6rem;
   align-items: center;
   margin: 2rem 0 2.5rem;
-  padding: 1rem 1.25rem;
+  padding: 0.75rem 1rem;
   background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 999px;
 }
 .filter-btn {
   padding: 0.5rem 1rem;
@@ -334,16 +361,11 @@ main { padding-bottom: 6rem; }
 }
 
 /* ---------- Gallery Masonry ---------- */
+/* No background / padding / border framing — cards sit directly on the page
+   gradient. The cards' own shadows give them presence. */
 .gallery {
   column-count: 4;
   column-gap: 1.25rem;
-  padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
   transition: opacity 200ms ease;
 }
 .gallery.fading { opacity: 0; }
@@ -357,7 +379,7 @@ main { padding-bottom: 6rem; }
   border-radius: var(--radius);
   overflow: hidden;
   background: var(--card-solid);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
   position: relative;
   cursor: pointer;
   transition: transform var(--transition), box-shadow var(--transition);
@@ -382,10 +404,11 @@ main { padding-bottom: 6rem; }
   align-items: flex-start;
   gap: 0.5rem;
 }
-.card-info h3 {
+.card-info .card-title {
   font-family: 'Inter', sans-serif;
   font-size: 0.95rem;
   font-weight: 600;
+  color: var(--text);
 }
 .card-info .price {
   font-size: 0.9rem;
@@ -407,7 +430,6 @@ main { padding-bottom: 6rem; }
   padding: 0.3rem 0.65rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(6px);
   color: var(--text);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -539,7 +561,7 @@ main { padding-bottom: 6rem; }
   position: absolute;
   left: 50%;
   top: 8%;
-  /* width & height set by JS based on artwork aspect ratio */
+  /* width & height are set by JS based on the artwork's aspect ratio. */
   width: 30%;
   height: 30%;
   transform: translateX(-50%);
@@ -550,7 +572,6 @@ main { padding-bottom: 6rem; }
     0 18px 30px rgba(0, 0, 0, 0.22),
     0 6px 12px rgba(0, 0, 0, 0.12),
     inset 0 0 0 1px rgba(0,0,0,0.04);
-  transition: width 300ms ease, height 300ms ease;
 }
 .in-situ .frame::after {
   /* subtle wall shadow under frame */
@@ -618,8 +639,8 @@ main { padding-bottom: 6rem; }
   object-fit: cover;
   border-radius: 8px;
 }
-.cart-item h3 { font-family: 'Inter', sans-serif; font-size: 1rem; margin-bottom: 0.25rem; }
-.cart-item h3 a:hover { text-decoration: underline; }
+.cart-item h2 { font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; letter-spacing: 0; }
+.cart-item h2 a:hover { text-decoration: underline; }
 .cart-item .meta { color: var(--muted); font-size: 0.85rem; }
 .cart-item .price { font-weight: 600; }
 .remove-btn {
@@ -729,9 +750,10 @@ main { padding-bottom: 6rem; }
   background: var(--text);
   border-radius: 50%;
 }
-.timeline-item h4 { font-family: 'Inter', sans-serif; font-size: 0.95rem; }
+.timeline-item h3 { font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; letter-spacing: 0; }
 .timeline-item .year { color: var(--muted); font-size: 0.78rem; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.08em; }
 .timeline-item p { color: var(--text-soft); font-size: 0.9rem; }
+.timeline-heading { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; margin: 2.5rem 0 1.5rem; }
 
 /* ---------- Contact ---------- */
 .contact-page { padding-top: 4rem; max-width: 900px; margin: 0 auto; }
@@ -780,7 +802,8 @@ main { padding-bottom: 6rem; }
   padding: 1.75rem;
   box-shadow: var(--shadow-sm);
 }
-.contact-info h3 { font-family: 'Inter', sans-serif; font-size: 1rem; margin-bottom: 1rem; }
+.contact-info h2 { font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 600; letter-spacing: 0; margin-bottom: 1rem; }
+.contact-info h2 + h2 { margin-top: 1.5rem; }
 .contact-info p { color: var(--text-soft); font-size: 0.9rem; margin-bottom: 0.6rem; }
 .contact-info a { color: var(--text); }
 

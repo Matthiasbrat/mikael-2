@@ -24,6 +24,14 @@ async function init() {
   document.getElementById('modal').addEventListener('click', e => {
     if (e.target.id === 'modal') closeModal();
   });
+
+  // Delegate edit/delete clicks so re-renders don't need to rewire per-row listeners.
+  document.getElementById('admin-rows').addEventListener('click', e => {
+    const editBtn = e.target.closest('[data-edit]');
+    if (editBtn) { openModal(editBtn.dataset.edit); return; }
+    const delBtn = e.target.closest('[data-del]');
+    if (delBtn) { deleteArt(delBtn.dataset.del); }
+  });
 }
 
 function login() {
@@ -71,8 +79,8 @@ function renderStats() {
 }
 
 function renderTable() {
+  // Listeners are delegated on #admin-rows in init(), no per-row wiring here.
   const rows = artworks.map(a => {
-    // Admin table thumbs are 50 CSS px → 100 sq is the retina target.
     const thumb = imageSquare(a.image, 100);
     return `
     <tr>
@@ -92,13 +100,6 @@ function renderTable() {
   `;
   }).join('');
   document.getElementById('admin-rows').innerHTML = rows;
-
-  document.querySelectorAll('[data-edit]').forEach(b => {
-    b.addEventListener('click', () => openModal(b.dataset.edit));
-  });
-  document.querySelectorAll('[data-del]').forEach(b => {
-    b.addEventListener('click', () => deleteArt(b.dataset.del));
-  });
 }
 
 function openModal(id) {
@@ -140,27 +141,38 @@ function saveArt(e) {
   if (document.getElementById('f-tag-new').checked) tags.push('nouveau');
   if (document.getElementById('f-tag-best').checked) tags.push('best-seller');
 
-  const data = {
-    id: id || String(Date.now()),
+  const yearInput = parseInt(document.getElementById('f-year').value, 10);
+  const priceInput = parseFloat(document.getElementById('f-price').value);
+
+  // Editable fields only — sales + createdAt are NOT in here so an edit
+  // can't accidentally reset them.
+  const editable = {
     title: document.getElementById('f-title').value,
     description: document.getElementById('f-description').value,
     category: document.getElementById('f-category').value,
     dimensions: document.getElementById('f-dimensions').value,
     technique: document.getElementById('f-technique').value,
-    year: parseInt(document.getElementById('f-year').value, 10),
-    price: parseFloat(document.getElementById('f-price').value),
-    image: document.getElementById('f-image').value || 'https://picsum.photos/seed/' + Date.now() + '/800/1000',
+    year: Number.isFinite(yearInput) ? yearInput : new Date().getFullYear(),
+    price: Number.isFinite(priceInput) ? priceInput : 0,
+    image: document.getElementById('f-image').value || `https://picsum.photos/seed/${Date.now()}/800/1000`,
     status: document.getElementById('f-status').value,
     tags,
-    sales: 0,
-    createdAt: new Date().toISOString().slice(0, 10),
   };
 
   if (id) {
     const idx = artworks.findIndex(a => a.id === id);
-    artworks[idx] = { ...artworks[idx], ...data };
+    if (idx === -1) {
+      showToast('Œuvre introuvable');
+      return;
+    }
+    artworks[idx] = { ...artworks[idx], ...editable };
   } else {
-    artworks.unshift(data);
+    artworks.unshift({
+      ...editable,
+      id: String(Date.now()),
+      sales: 0,
+      createdAt: new Date().toISOString().slice(0, 10),
+    });
   }
   saveArtworks(artworks);
   closeModal();

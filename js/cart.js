@@ -12,9 +12,28 @@ async function init() {
   const artworks = await loadArtworks();
   const root = document.getElementById('cart-root');
 
+  // Delegate clicks on the root so re-renders don't drop listeners.
+  root.addEventListener('click', e => {
+    const removeBtn = e.target.closest('.remove-btn');
+    if (removeBtn) {
+      removeFromCart(removeBtn.dataset.id);
+      render();
+      return;
+    }
+    if (e.target.closest('#checkout')) {
+      handleCheckout();
+    }
+  });
+
   function render() {
     const ids = getCart();
     const items = ids.map(id => artworks.find(a => a.id === id)).filter(Boolean);
+
+    // Prune cart ids whose artwork was deleted in admin so the badge count
+    // stays in sync with the rendered list.
+    if (items.length !== ids.length) {
+      setCart(items.map(a => a.id));
+    }
 
     if (!items.length) {
       root.innerHTML = `
@@ -30,22 +49,20 @@ async function init() {
     root.innerHTML = `
       <div class="cart-list">
         ${items.map(a => {
-          // Thumb is 110 CSS px (80 on mobile), cover-cropped → 220 sq is the
-          // retina target; square request keeps the file tiny.
           const thumb = imageSquare(a.image, 220);
           return `
           <div class="cart-item">
-            <a href="artwork.html?id=${escapeHtml(a.id)}">
+            <a href="${artworkHref(a.id)}">
               <img src="${escapeHtml(thumb.url)}" alt="${escapeHtml(a.title)}"
                    width="${thumb.width}" height="${thumb.height}"
                    loading="lazy" decoding="async" />
             </a>
             <div>
-              <h3><a href="artwork.html?id=${escapeHtml(a.id)}">${escapeHtml(a.title)}</a></h3>
+              <h2><a href="${artworkHref(a.id)}">${escapeHtml(a.title)}</a></h2>
               <div class="meta">${escapeHtml(a.dimensions)} · ${escapeHtml(a.technique)}</div>
             </div>
             <div class="price">${formatPrice(a.price)}</div>
-            <button class="remove-btn" data-id="${escapeHtml(a.id)}" aria-label="Retirer">Retirer</button>
+            <button class="remove-btn" data-id="${escapeHtml(a.id)}" aria-label="Retirer ${escapeHtml(a.title)}">Retirer</button>
           </div>
         `;
         }).join('')}
@@ -58,27 +75,17 @@ async function init() {
         <p class="cart-note">Paiement sécurisé via Stripe. Mode démo activé sur ce prototype.</p>
       </div>
     `;
-
-    root.querySelectorAll('.remove-btn').forEach(b => {
-      b.addEventListener('click', () => {
-        removeFromCart(b.dataset.id);
-        render();
-      });
-    });
-
-    document.getElementById('checkout').addEventListener('click', () => checkout(items));
   }
 
-  function checkout(items) {
+  function handleCheckout() {
     if (STRIPE_PUBLIC_KEY.includes('REPLACE_ME')) {
-      // Demo: simulate a successful checkout end-to-end.
       window.location.href = 'success.html?demo=1';
       return;
     }
     // Real Stripe (uncomment after configuring):
     // const stripe = Stripe(STRIPE_PUBLIC_KEY);
     // stripe.redirectToCheckout({
-    //   lineItems: items.map(a => ({ price: a.stripePriceId, quantity: 1 })),
+    //   lineItems: getCart().map(id => ({ price: /* priceIdFor(id) */, quantity: 1 })),
     //   mode: 'payment',
     //   successUrl: window.location.origin + '/success.html',
     //   cancelUrl: window.location.href,

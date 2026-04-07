@@ -1,64 +1,32 @@
 // Artwork detail page: hero image, in-situ scene with adaptive frame, specs, similar.
 
+// Minimalist gallery-wall scene. No furniture — just a warm wall lit by a soft
+// spotlight from above, a thin floor strip, and the frame (positioned separately
+// by CSS) hovering in the lit area. Matches the sober brand better than a
+// cartoonish living room.
 const ROOM_SVG = `
 <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" class="room" aria-hidden="true">
   <defs>
     <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#fbf8f3"/>
-      <stop offset="1" stop-color="#ece4d4"/>
+      <stop offset="0" stop-color="#faf6ec"/>
+      <stop offset="0.78" stop-color="#ece3cf"/>
+      <stop offset="1" stop-color="#e0d5be"/>
     </linearGradient>
     <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#c9b59a"/>
-      <stop offset="1" stop-color="#9c8568"/>
+      <stop offset="0" stop-color="#c9bb9f"/>
+      <stop offset="1" stop-color="#8e7c5c"/>
     </linearGradient>
-    <radialGradient id="sun" cx="50%" cy="20%" r="60%">
-      <stop offset="0" stop-color="#fff" stop-opacity="0.55"/>
-      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    <radialGradient id="spotlight" cx="50%" cy="15%" r="55%">
+      <stop offset="0" stop-color="#fff7e0" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#fff7e0" stop-opacity="0"/>
     </radialGradient>
   </defs>
-
-  <!-- Wall -->
-  <rect width="800" height="430" fill="url(#wall)"/>
-  <rect width="800" height="430" fill="url(#sun)"/>
-
-  <!-- Floor -->
-  <rect y="430" width="800" height="170" fill="url(#floor)"/>
-  <line x1="0" y1="475" x2="800" y2="475" stroke="#000" stroke-opacity="0.07"/>
-  <line x1="0" y1="525" x2="800" y2="525" stroke="#000" stroke-opacity="0.05"/>
-  <line x1="0" y1="575" x2="800" y2="575" stroke="#000" stroke-opacity="0.04"/>
-
-  <!-- Baseboard -->
-  <rect y="425" width="800" height="6" fill="#fff" opacity="0.7"/>
-
-  <!-- Sofa shadow -->
-  <ellipse cx="400" cy="558" rx="240" ry="12" fill="#000" opacity="0.18"/>
-
-  <!-- Sofa -->
-  <rect x="180" y="445" width="440" height="105" rx="18" fill="#5b6776"/>
-  <rect x="195" y="435" width="410" height="48" rx="14" fill="#6c7888"/>
-  <rect x="220" y="450" width="55" height="38" rx="6" fill="#8593a3" opacity="0.85"/>
-  <rect x="525" y="450" width="55" height="38" rx="6" fill="#a8b3c2" opacity="0.75"/>
-  <rect x="200" y="548" width="6" height="14" fill="#2a2a2a"/>
-  <rect x="594" y="548" width="6" height="14" fill="#2a2a2a"/>
-
-  <!-- Side table -->
-  <rect x="68" y="495" width="92" height="65" fill="#7a624a"/>
-  <rect x="65" y="488" width="98" height="9" fill="#8e7459"/>
-  <rect x="78" y="555" width="5" height="12" fill="#3a2e22"/>
-  <rect x="145" y="555" width="5" height="12" fill="#3a2e22"/>
-
-  <!-- Plant on table -->
-  <rect x="100" y="455" width="36" height="35" rx="3" fill="#e3d8c2"/>
-  <path d="M118 455 q-22 -45 -10 -82 q5 40 10 82 z" fill="#6b8a5d"/>
-  <path d="M118 455 q24 -38 14 -70 q-9 32 -14 70 z" fill="#7a9a6c"/>
-  <path d="M118 455 q-2 -55 6 -60 q-3 33 -6 60 z" fill="#5e7d51"/>
-
-  <!-- Floor lamp -->
-  <ellipse cx="715" cy="563" rx="32" ry="6" fill="#000" opacity="0.18"/>
-  <rect x="712" y="290" width="6" height="270" fill="#2d2d2d"/>
-  <ellipse cx="715" cy="560" rx="22" ry="4" fill="#2d2d2d"/>
-  <path d="M688 290 L742 290 L730 245 L700 245 Z" fill="#f0e3c8"/>
-  <ellipse cx="715" cy="320" rx="60" ry="80" fill="#fff5d8" opacity="0.3"/>
+  <rect width="800" height="520" fill="url(#wall)"/>
+  <rect width="800" height="520" fill="url(#spotlight)"/>
+  <rect y="515" width="800" height="5" fill="#fff" opacity="0.55"/>
+  <rect y="520" width="800" height="80" fill="url(#floor)"/>
+  <rect y="520" width="800" height="2" fill="#000" opacity="0.12"/>
+  <line x1="0" y1="560" x2="800" y2="560" stroke="#000" stroke-opacity="0.05"/>
 </svg>
 `;
 
@@ -93,7 +61,7 @@ async function init() {
              width="${mainImg.width}" height="${mainImg.height}"
              fetchpriority="high" decoding="sync" />
       </div>
-      <div class="in-situ" aria-label="Aperçu en situation de l'œuvre">
+      <div class="in-situ" role="group" aria-labelledby="in-situ-label">
         ${ROOM_SVG}
         <div class="frame">
           <img src="${escapeHtml(situImg.url)}" alt=""
@@ -101,7 +69,7 @@ async function init() {
                loading="lazy" decoding="async" />
         </div>
       </div>
-      <p class="in-situ-label">Aperçu en situation</p>
+      <p class="in-situ-label" id="in-situ-label">Aperçu en situation</p>
     </div>
     <div class="artwork-info">
       <div class="artwork-tags">
@@ -127,6 +95,7 @@ async function init() {
     </div>
   `;
 
+  root.setAttribute('aria-busy', 'false');
   document.getElementById('add-cart')?.addEventListener('click', () => addToCart(art.id));
 
   // Adaptive frame sizing based on artwork aspect ratio.
@@ -161,20 +130,7 @@ async function init() {
     similarRoot.innerHTML = `
       <h2>Œuvres similaires</h2>
       <div class="gallery">
-        ${similar.map(a => {
-          const img = imageAt(a.image, 600);
-          return `
-            <a class="card" href="artwork.html?id=${escapeHtml(a.id)}">
-              <img src="${escapeHtml(img.url)}" alt="${escapeHtml(a.title)}"
-                   width="${img.width}" height="${img.height}"
-                   loading="lazy" decoding="async" />
-              <div class="card-info">
-                <h3>${escapeHtml(a.title)}</h3>
-                <span class="price">${formatPrice(a.price)}</span>
-              </div>
-            </a>
-          `;
-        }).join('')}
+        ${similar.map((a, i) => cardHTML(a, i)).join('')}
       </div>
     `;
   }

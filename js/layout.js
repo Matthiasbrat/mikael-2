@@ -13,6 +13,7 @@
     </svg>`;
 
   const headerHTML = `
+    <a href="#main-content" class="skip-link">Aller au contenu principal</a>
     <header class="site-header">
       <div class="header-inner">
         <a href="index.html" class="brand">Mikael's Gallery</a>
@@ -66,6 +67,10 @@
     const f = document.getElementById('site-footer');
     if (h) h.outerHTML = headerHTML;
     if (f) f.outerHTML = footerHTML;
+
+    // Ensure the skip link has a target.
+    const main = document.querySelector('main');
+    if (main && !main.id) main.id = 'main-content';
 
     const toggle = document.querySelector('.nav-toggle');
     const nav = document.getElementById('main-nav');
