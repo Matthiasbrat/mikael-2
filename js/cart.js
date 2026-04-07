@@ -29,10 +29,16 @@ async function init() {
     const total = items.reduce((s, a) => s + a.price, 0);
     root.innerHTML = `
       <div class="cart-list">
-        ${items.map(a => `
+        ${items.map(a => {
+          // Thumb is 110 CSS px (80 on mobile), cover-cropped → 220 sq is the
+          // retina target; square request keeps the file tiny.
+          const thumb = imageSquare(a.image, 220);
+          return `
           <div class="cart-item">
             <a href="artwork.html?id=${escapeHtml(a.id)}">
-              <img src="${escapeHtml(a.image)}" alt="${escapeHtml(a.title)}" />
+              <img src="${escapeHtml(thumb.url)}" alt="${escapeHtml(a.title)}"
+                   width="${thumb.width}" height="${thumb.height}"
+                   loading="lazy" decoding="async" />
             </a>
             <div>
               <h3><a href="artwork.html?id=${escapeHtml(a.id)}">${escapeHtml(a.title)}</a></h3>
@@ -41,7 +47,8 @@ async function init() {
             <div class="price">${formatPrice(a.price)}</div>
             <button class="remove-btn" data-id="${escapeHtml(a.id)}" aria-label="Retirer">Retirer</button>
           </div>
-        `).join('')}
+        `;
+        }).join('')}
       </div>
       <div class="cart-summary">
         <div class="row"><span>Sous-total</span><span>${formatPrice(total)}</span></div>

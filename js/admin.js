@@ -71,9 +71,12 @@ function renderStats() {
 }
 
 function renderTable() {
-  const rows = artworks.map(a => `
+  const rows = artworks.map(a => {
+    // Admin table thumbs are 50 CSS px → 100 sq is the retina target.
+    const thumb = imageSquare(a.image, 100);
+    return `
     <tr>
-      <td><img src="${escapeHtml(a.image)}" alt="" /></td>
+      <td><img src="${escapeHtml(thumb.url)}" alt="" width="${thumb.width}" height="${thumb.height}" loading="lazy" decoding="async" /></td>
       <td>${escapeHtml(a.title)}</td>
       <td>${escapeHtml(a.category)}</td>
       <td>${formatPrice(a.price)}</td>
@@ -86,7 +89,8 @@ function renderTable() {
         </div>
       </td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
   document.getElementById('admin-rows').innerHTML = rows;
 
   document.querySelectorAll('[data-edit]').forEach(b => {

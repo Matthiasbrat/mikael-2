@@ -33,9 +33,14 @@ function renderHero() {
     .sort((a, b) => (b.sales || 0) - (a.sales || 0) || b.price - a.price)[0];
   if (!featured) return;
 
+  // Width 900 targets the hero-featured card at ~half viewport on large screens
+  // (retina of ~450 display). The matching URL is preloaded in index.html head.
+  const img = imageAt(featured.image, 900);
   slot.innerHTML = `
     <a class="hero-featured" href="artwork.html?id=${escapeHtml(featured.id)}">
-      <img src="${escapeHtml(featured.image)}" alt="${escapeHtml(featured.title)}" />
+      <img src="${escapeHtml(img.url)}" alt="${escapeHtml(featured.title)}"
+           width="${img.width}" height="${img.height}"
+           fetchpriority="high" decoding="sync" />
       <div class="hero-featured-label">
         <span>Œuvre mise en avant</span>
         <strong>${escapeHtml(featured.title)}</strong>
@@ -72,6 +77,9 @@ function render(animate = true) {
 }
 
 function cardHTML(a, i) {
+  // Cards render ~300 CSS px wide on desktop (4-col masonry in 1280 container),
+  // so 600 is the ideal retina size.
+  const img = imageAt(a.image, 600);
   const tags = a.tags || [];
   const badges = `
     ${tags.includes('nouveau') ? '<span class="badge">Nouveau</span>' : ''}
@@ -80,7 +88,9 @@ function cardHTML(a, i) {
   return `
     <a class="card" href="artwork.html?id=${escapeHtml(a.id)}" style="animation-delay:${i * 40}ms">
       <div class="card-badges">${badges}</div>
-      <img src="${escapeHtml(a.image)}" alt="${escapeHtml(a.title)}" loading="lazy" />
+      <img src="${escapeHtml(img.url)}" alt="${escapeHtml(a.title)}"
+           width="${img.width}" height="${img.height}"
+           loading="lazy" decoding="async" />
       <div class="card-info">
         <h3>${escapeHtml(a.title)}</h3>
         <span class="price">${formatPrice(a.price)}</span>

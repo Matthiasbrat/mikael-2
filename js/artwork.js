@@ -80,16 +80,25 @@ async function init() {
 
   document.title = `${art.title} — Mikael's Gallery`;
 
+  // Main image is the LCP element on this page → fetchpriority high + decoding sync.
+  // In-situ frame is below the fold and small → lazy + async decode.
+  const mainImg = imageAt(art.image, 1200);
+  const situImg = imageAt(art.image, 500);
+
   root.innerHTML = `
     <div class="artwork-media">
       <a href="index.html" class="back-link">← Retour à la galerie</a>
       <div class="main-image">
-        <img src="${escapeHtml(art.image)}" alt="${escapeHtml(art.title)}" />
+        <img src="${escapeHtml(mainImg.url)}" alt="${escapeHtml(art.title)}"
+             width="${mainImg.width}" height="${mainImg.height}"
+             fetchpriority="high" decoding="sync" />
       </div>
       <div class="in-situ" aria-label="Aperçu en situation de l'œuvre">
         ${ROOM_SVG}
         <div class="frame">
-          <img src="${escapeHtml(art.image)}" alt="" />
+          <img src="${escapeHtml(situImg.url)}" alt=""
+               width="${situImg.width}" height="${situImg.height}"
+               loading="lazy" decoding="async" />
         </div>
       </div>
       <p class="in-situ-label">Aperçu en situation</p>
@@ -152,15 +161,20 @@ async function init() {
     similarRoot.innerHTML = `
       <h2>Œuvres similaires</h2>
       <div class="gallery">
-        ${similar.map(a => `
-          <a class="card" href="artwork.html?id=${escapeHtml(a.id)}">
-            <img src="${escapeHtml(a.image)}" alt="${escapeHtml(a.title)}" loading="lazy" />
-            <div class="card-info">
-              <h3>${escapeHtml(a.title)}</h3>
-              <span class="price">${formatPrice(a.price)}</span>
-            </div>
-          </a>
-        `).join('')}
+        ${similar.map(a => {
+          const img = imageAt(a.image, 600);
+          return `
+            <a class="card" href="artwork.html?id=${escapeHtml(a.id)}">
+              <img src="${escapeHtml(img.url)}" alt="${escapeHtml(a.title)}"
+                   width="${img.width}" height="${img.height}"
+                   loading="lazy" decoding="async" />
+              <div class="card-info">
+                <h3>${escapeHtml(a.title)}</h3>
+                <span class="price">${formatPrice(a.price)}</span>
+              </div>
+            </a>
+          `;
+        }).join('')}
       </div>
     `;
   }

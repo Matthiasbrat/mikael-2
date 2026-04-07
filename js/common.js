@@ -97,3 +97,20 @@ function escapeHtml(s) {
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[c]));
 }
+
+// Picsum URL transformers: rewrite a picsum URL at the requested target width
+// (preserving the original aspect ratio) or as a square crop.
+// Returning { url, width, height } lets callers set <img> attributes in one shot.
+function imageAt(imageUrl, targetWidth) {
+  const m = String(imageUrl).match(/^(https:\/\/picsum\.photos\/seed\/[^/]+)\/(\d+)\/(\d+)$/);
+  if (!m) return { url: imageUrl, width: targetWidth, height: targetWidth };
+  const width = targetWidth;
+  const height = Math.round(targetWidth * Number(m[3]) / Number(m[2]));
+  return { url: `${m[1]}/${width}/${height}`, width, height };
+}
+
+function imageSquare(imageUrl, size) {
+  const m = String(imageUrl).match(/^(https:\/\/picsum\.photos\/seed\/[^/]+)\//);
+  if (!m) return { url: imageUrl, width: size, height: size };
+  return { url: `${m[1]}/${size}/${size}`, width: size, height: size };
+}

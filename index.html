@@ -11,7 +11,14 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23161628'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Georgia,serif' font-size='34' font-weight='600' fill='%23fff'%3EM%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
+  <!-- LCP image preload: current best-seller hero featured (Crépuscule Pourpre @900w) -->
+  <link rel="preload" as="image" href="https://picsum.photos/seed/purple/900/1350" fetchpriority="high" />
+  <!-- Google Fonts made non-render-blocking via the print-media swap trick; the browser
+       downloads the stylesheet at low priority then swaps it in once loaded. Dropped
+       Playfair 500 and 700 (unused in CSS), keeping only 600. -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&display=swap" as="style" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&display=swap" /></noscript>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
