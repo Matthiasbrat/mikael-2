@@ -360,6 +360,21 @@ main { padding-bottom: 6rem; }
   cursor: pointer;
 }
 
+/* At narrow widths the filter buttons wrap to 2-3 rows, and a 999px radius
+   on a multi-row container renders as a bulging blob. Drop to the standard
+   rounded-rectangle radius and put the sort select on its own full-width row. */
+@media (max-width: 720px) {
+  .filters {
+    border-radius: var(--radius);
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+  .filters select {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
 /* ---------- Gallery Masonry ---------- */
 /* No background / padding / border framing — cards sit directly on the page
    gradient. The cards' own shadows give them presence. */
