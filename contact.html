@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — Mikael's Gallery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="brand">Mikael's Gallery</a>
+      <nav class="nav">
+        <a href="index.html">Galerie</a>
+        <a href="about.html">À propos</a>
+        <a href="contact.html" class="active">Contact</a>
+        <a href="cart.html" class="cart-link" aria-label="Panier">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="cart-badge hidden">0</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="contact-page">
+      <h1>Contact</h1>
+      <p>Une question, une commande, une collaboration ? Écrivez-moi.</p>
+
+      <div class="contact-grid">
+        <form id="contact-form" novalidate>
+          <div class="form-row">
+            <label for="name">Nom</label>
+            <input id="name" name="name" type="text" required />
+          </div>
+          <div class="form-row">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required />
+          </div>
+          <div class="form-row">
+            <label for="subject">Sujet</label>
+            <select id="subject" name="subject">
+              <option>Renseignement sur une œuvre</option>
+              <option>Commande personnalisée</option>
+              <option>Exposition / Collaboration</option>
+              <option>Autre</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" required></textarea>
+          </div>
+          <button type="submit" class="btn">Envoyer</button>
+        </form>
+
+        <aside class="contact-info">
+          <h3>Studio</h3>
+          <p>14 rue des Lumières<br />75011 Paris, France</p>
+          <p><a href="mailto:hello@mikaelsgallery.art">hello@mikaelsgallery.art</a></p>
+          <p>+33 (0)1 23 45 67 89</p>
+          <h3 style="margin-top:1.5rem;">Réseaux</h3>
+          <p><a href="#">Instagram</a> · <a href="#">Behance</a> · <a href="#">Vimeo</a></p>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>© 2026 Mikael's Gallery — Tous droits réservés</p>
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+    document.getElementById('contact-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const f = e.target;
+      if (!f.name.value || !f.email.value || !f.message.value) {
+        showToast('Merci de remplir tous les champs.');
+        return;
+      }
+      showToast('Message envoyé. Merci !');
+      f.reset();
+    });
+  </script>
+</body>
+</html>
