@@ -17,41 +17,37 @@ jobs:
         with:
           node-version: '20'
 
-      # @lhci/cli does not bundle Chrome; it relies on chrome-launcher finding
-      # an existing binary. On ubuntu-24.04 runners chrome-launcher can fail
-      # to locate the preinstalled Chrome, so we install one explicitly.
-      # This action sets CHROME_PATH in the environment automatically.
-      - name: Setup Chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: stable
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Show environment
+      # Serve the static site on a known port so Lighthouse can crawl it.
+      # We use a simple http-server rather than lhci's built-in staticDistDir
+      # because treosh/lighthouse-ci-action handles Chrome + lhci invocation
+      # cleanly when given explicit URLs.
+      - name: Install and start http-server
         run: |
-          node --version
-          npx lhci --version
-          echo "CHROME_PATH=$CHROME_PATH"
-          ls -la
+          npm install -g http-server
+          nohup http-server . -p 8080 --silent > /tmp/http-server.log 2>&1 &
+          # Wait until the server actually accepts connections (fail fast if not)
+          for i in {1..20}; do
+            if curl -sf http://localhost:8080/ > /dev/null; then
+              echo "Server is up"
+              exit 0
+            fi
+            sleep 0.5
+          done
+          echo "Server failed to start"; cat /tmp/http-server.log; exit 1
 
-      # continue-on-error: true so assertion failures don't prevent the
-      # artifact upload step from running.
+      # treosh's action bundles everything we need: it installs @lhci/cli,
+      # sets up Chrome, runs lighthouse against the given URLs, uploads the
+      # reports to Lighthouse's temporary public storage (shareable URLs
+      # printed in the job summary) and as a GitHub Actions artifact.
       - name: Run Lighthouse CI
-        run: npm run lighthouse
-        continue-on-error: true
-        env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
-
-      - name: List Lighthouse output
-        if: always()
-        run: ls -la .lighthouseci/ 2>/dev/null || echo "No .lighthouseci directory was created"
-
-      - name: Upload Lighthouse reports
-        if: always()
-        uses: actions/upload-artifact@v4
+        uses: treosh/lighthouse-ci-action@v12
         with:
-          name: lighthouse-reports
-          path: .lighthouseci/
-          if-no-files-found: warn
+          urls: |
+            http://localhost:8080/
+            http://localhost:8080/about.html
+            http://localhost:8080/contact.html
+            http://localhost:8080/cart.html
+            http://localhost:8080/artwork.html?id=1
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          runs: 1
