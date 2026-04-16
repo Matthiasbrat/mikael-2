@@ -515,17 +515,14 @@ main { padding-bottom: 5rem; }
 .stat-card { background: var(--card-solid); padding: 1.25rem; border-radius: var(--radius); box-shadow: var(--shadow-sm); }
 .stat-card .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
 .stat-card .value { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-top: 0.3rem; }
-/* Scrollable table wrapper for narrow screens */
-.table-wrap {
-  overflow-x: auto; -webkit-overflow-scrolling: touch;
-  border-radius: var(--radius); box-shadow: var(--shadow-sm);
-}
+/* Admin table — standard table on desktop, stacked cards on mobile */
+.table-wrap { border-radius: var(--radius); box-shadow: var(--shadow-sm); }
 .admin-table {
-  width: 100%; min-width: 640px;
+  width: 100%;
   background: var(--card-solid);
   border-collapse: collapse;
 }
-.admin-table th, .admin-table td { padding: 0.9rem; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.88rem; white-space: nowrap; }
+.admin-table th, .admin-table td { padding: 0.9rem; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
 .admin-table th { background: #f6f8fb; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .admin-table tr:last-child td { border-bottom: none; }
 .admin-table img { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; }
@@ -533,6 +530,41 @@ main { padding-bottom: 5rem; }
 .icon-btn { padding: 0.35rem 0.65rem; background: #f1f4f9; border-radius: 6px; font-size: 0.78rem; transition: background var(--transition); }
 .icon-btn:hover { background: #e3e8f0; }
 .icon-btn.danger { color: var(--sold); }
+
+/* On mobile: each <tr> becomes a card with CSS grid layout */
+@media (max-width: 720px) {
+  .table-wrap { box-shadow: none; }
+  .admin-table { display: block; background: transparent; }
+  .admin-table thead { display: none; }
+  .admin-table tbody { display: flex; flex-direction: column; gap: 0.6rem; }
+  .admin-table tr {
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    gap: 0.15rem 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card-solid);
+    box-shadow: var(--shadow-sm);
+    align-items: center;
+  }
+  .admin-table td { padding: 0; border: none; font-size: 0.85rem; white-space: normal; }
+  /* Row 1-2: image left, title + category right, price + status far right */
+  .admin-table td:nth-child(1) { grid-column: 1; grid-row: 1 / 3; }
+  .admin-table td:nth-child(2) { grid-column: 2; grid-row: 1; font-weight: 600; }
+  .admin-table td:nth-child(3) { grid-column: 2; grid-row: 2; color: var(--muted); font-size: 0.78rem; }
+  .admin-table td:nth-child(4) { grid-column: 3; grid-row: 1; font-weight: 600; text-align: right; font-size: 0.85rem; }
+  .admin-table td:nth-child(5) { grid-column: 3; grid-row: 2; text-align: right; font-size: 0.78rem; }
+  /* Sales: hide on mobile — not critical at a glance */
+  .admin-table td:nth-child(6) { display: none; }
+  /* Actions: full-width bottom row */
+  .admin-table td:nth-child(7) {
+    grid-column: 1 / -1;
+    margin-top: 0.35rem; padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+  }
+}
+
 .admin-section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem; }
 .admin-section-title h2 { font-size: 1.3rem; }
 .modal-backdrop { position: fixed; inset: 0; background: rgba(20,30,60,0.4); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 2rem; }
@@ -547,9 +579,18 @@ main { padding-bottom: 5rem; }
   .admin-header h1 { font-size: 1.5rem; }
   .admin-stats { grid-template-columns: repeat(2, 1fr); }
   .stat-card .value { font-size: 1.4rem; }
-  .modal-backdrop { padding: 0.75rem; }
-  .modal { padding: 1.25rem; border-radius: var(--radius); }
+  .modal-backdrop { padding: 0.5rem; align-items: flex-end; }
+  .modal {
+    padding: 1.25rem; border-radius: var(--radius) var(--radius) 0 0;
+    max-height: 92vh;
+  }
   .modal h2 { font-size: 1.1rem; margin-bottom: 1rem; }
+  .modal .form-row input,
+  .modal .form-row textarea,
+  .modal .form-row select {
+    font-size: 16px; /* prevents iOS zoom on focus */
+  }
+  .modal .form-row input[type="file"] { font-size: 0.82rem; }
   .modal-actions { flex-direction: column; }
   .modal-actions .btn { width: 100%; }
 }
