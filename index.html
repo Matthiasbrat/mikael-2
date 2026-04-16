@@ -27,30 +27,37 @@
     </section>
 
     <div class="filter-bar">
-      <div class="filter-toggles">
-        <button class="filter-toggle" data-panel="style">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>
-          Style
-        </button>
-        <button class="filter-toggle" data-panel="price">
-          Prix <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
-        <button class="filter-toggle" data-panel="medium">
-          Medium <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="m6 9 6 6 6-6"/></svg>
-          <span class="count" style="display:none;"></span>
-        </button>
-        <select id="sort-select" style="margin-left:auto;padding:0.5rem 0.8rem;border:1px solid var(--border);border-radius:999px;font-size:0.82rem;background:var(--surface);color:var(--text);cursor:pointer;">
-          <option value="recent">Récents</option>
-          <option value="bestseller">Populaires</option>
-          <option value="price-asc">Prix ↑</option>
-          <option value="price-desc">Prix ↓</option>
-        </select>
+      <div class="filter-row">
+        <div class="cat-tabs">
+          <button class="cat-btn active" data-cat="all">Tout</button>
+          <button class="cat-btn" data-cat="paysage">Paysage</button>
+          <button class="cat-btn" data-cat="abstrait">Abstrait</button>
+          <button class="cat-btn" data-cat="portrait">Portrait</button>
+          <button class="cat-btn" data-cat="nature">Nature</button>
+        </div>
+        <div class="filter-selects">
+          <select id="price-filter" aria-label="Filtrer par prix">
+            <option value="">Prix</option>
+            <option value="0-500">&lt; 500 CHF</option>
+            <option value="500-1000">500 – 1 000 CHF</option>
+            <option value="1000-2000">1 000 – 2 000 CHF</option>
+            <option value="2000+">2 000+ CHF</option>
+          </select>
+          <select id="medium-filter" aria-label="Filtrer par medium">
+            <option value="">Medium</option>
+            <option value="Peinture">Peinture</option>
+            <option value="Photographie">Photographie</option>
+            <option value="Dessin">Dessin</option>
+            <option value="Technique mixte">Technique mixte</option>
+          </select>
+          <select id="sort-select" aria-label="Trier">
+            <option value="recent">Récents</option>
+            <option value="bestseller">Populaires</option>
+            <option value="price-asc">Prix croissant</option>
+            <option value="price-desc">Prix décroissant</option>
+          </select>
+        </div>
       </div>
-
-      <div class="filter-panel" data-panel="style"></div>
-      <div class="filter-panel" data-panel="price"></div>
-      <div class="filter-panel" data-panel="medium"></div>
-
       <div id="active-filters" class="active-filters"></div>
     </div>
 
