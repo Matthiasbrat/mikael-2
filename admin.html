@@ -42,6 +42,7 @@
         <button class="btn" id="new-btn">+ Nouvelle œuvre</button>
       </div>
 
+      <div class="table-wrap">
       <table class="admin-table">
         <thead>
           <tr>
@@ -56,6 +57,7 @@
         </thead>
         <tbody id="admin-rows"></tbody>
       </table>
+      </div>
     </section>
 
     <div id="modal" class="modal-backdrop hidden">
@@ -73,10 +75,18 @@
               <option value="nature">Nature</option>
             </select>
           </div>
-          <div class="form-row"><label for="f-dimensions">Dimensions</label><input id="f-dimensions" placeholder="60 x 80 cm" /></div>
-          <div class="form-row"><label for="f-technique">Technique</label><input id="f-technique" /></div>
+          <div class="form-row"><label for="f-medium">Medium</label>
+            <select id="f-medium">
+              <option value="Peinture">Peinture</option>
+              <option value="Photographie">Photographie</option>
+              <option value="Dessin">Dessin</option>
+              <option value="Technique mixte">Technique mixte</option>
+            </select>
+          </div>
+          <div class="form-row"><label for="f-dimensions">Dimensions</label><input id="f-dimensions" placeholder="60 × 80 cm" /></div>
+          <div class="form-row"><label for="f-technique">Technique</label><input id="f-technique" placeholder="Huile sur toile, Acrylique..." /></div>
           <div class="form-row"><label for="f-year">Année</label><input id="f-year" type="number" min="1900" max="2100" /></div>
-          <div class="form-row"><label for="f-price">Prix (€)</label><input id="f-price" type="number" min="0" step="10" required /></div>
+          <div class="form-row"><label for="f-price">Prix (CHF)</label><input id="f-price" type="number" min="0" step="10" required /></div>
           <div class="form-row"><label for="f-image">Image (URL)</label><input id="f-image" placeholder="https://..." /></div>
           <div class="form-row"><label for="f-upload">Image (upload)</label><input id="f-upload" type="file" accept="image/*" /></div>
           <div class="form-row"><label for="f-status">Statut</label>

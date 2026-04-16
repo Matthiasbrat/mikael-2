@@ -109,6 +109,7 @@ function openModal(id) {
   document.getElementById('f-title').value = art?.title || '';
   document.getElementById('f-description').value = art?.description || '';
   document.getElementById('f-category').value = art?.category || 'paysage';
+  document.getElementById('f-medium').value = art?.medium || 'Peinture';
   document.getElementById('f-dimensions').value = art?.dimensions || '';
   document.getElementById('f-technique').value = art?.technique || '';
   document.getElementById('f-year').value = art?.year || new Date().getFullYear();
@@ -150,6 +151,7 @@ function saveArt(e) {
     title: document.getElementById('f-title').value,
     description: document.getElementById('f-description').value,
     category: document.getElementById('f-category').value,
+    medium: document.getElementById('f-medium').value,
     dimensions: document.getElementById('f-dimensions').value,
     technique: document.getElementById('f-technique').value,
     year: Number.isFinite(yearInput) ? yearInput : new Date().getFullYear(),
