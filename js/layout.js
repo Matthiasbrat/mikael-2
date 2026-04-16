@@ -1,33 +1,32 @@
-// Injects the shared header & footer into mount points (#site-header, #site-footer).
-// Single source of truth for navigation, eliminating per-page duplication.
-
 (function () {
   const path = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
   const isActive = href => path === href ? 'active' : '';
 
-  const cartIcon = `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
-      <path d="M3 6h18"/>
-      <path d="M16 10a4 4 0 0 1-8 0"/>
-    </svg>`;
+  const heartIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+  const cartIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`;
 
   const headerHTML = `
     <a href="#main-content" class="skip-link">Aller au contenu principal</a>
     <header class="site-header">
       <div class="header-inner">
         <a href="index.html" class="brand">Mikael's Gallery</a>
-        <button class="nav-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="main-nav">
+        <button class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="main-nav">
           <span></span><span></span><span></span>
         </button>
         <nav class="nav" id="main-nav">
           <a href="index.html" class="${isActive('index.html')}">Galerie</a>
           <a href="about.html" class="${isActive('about.html')}">À propos</a>
           <a href="contact.html" class="${isActive('contact.html')}">Contact</a>
-          <a href="cart.html" class="cart-link ${isActive('cart.html')}" aria-label="Panier">
-            ${cartIcon}
-            <span class="cart-badge hidden">0</span>
-          </a>
+          <div class="nav-icons">
+            <a href="#" class="icon-link likes-link" aria-label="Favoris">
+              ${heartIcon}
+              <span class="badge likes-badge hidden">(0)</span>
+            </a>
+            <a href="cart.html" class="icon-link cart-link ${isActive('cart.html')}" aria-label="Panier">
+              ${cartIcon}
+              <span class="badge cart-badge hidden">(0)</span>
+            </a>
+          </div>
         </nav>
       </div>
     </header>
@@ -55,7 +54,6 @@
           <h4>Suivre</h4>
           <a href="#">Instagram</a>
           <a href="#">Behance</a>
-          <a href="#">Vimeo</a>
         </div>
       </div>
       <div class="footer-copy container">© 2026 Mikael's Gallery — Tous droits réservés</div>
@@ -68,7 +66,6 @@
     if (h) h.outerHTML = headerHTML;
     if (f) f.outerHTML = footerHTML;
 
-    // Ensure the skip link has a target.
     const main = document.querySelector('main');
     if (main && !main.id) main.id = 'main-content';
 
@@ -80,7 +77,6 @@
         toggle.classList.toggle('open', open);
         toggle.setAttribute('aria-expanded', String(open));
       });
-      // Close on link click (mobile)
       nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
         nav.classList.remove('open');
         toggle.classList.remove('open');
@@ -89,11 +85,9 @@
     }
 
     if (typeof updateCartBadge === 'function') updateCartBadge();
+    if (typeof updateLikesBadge === 'function') updateLikesBadge();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mount);
-  } else {
-    mount();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
+  else mount();
 })();

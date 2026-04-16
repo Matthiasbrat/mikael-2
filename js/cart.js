@@ -1,45 +1,25 @@
-// Cart page: list, total, Stripe Checkout (with demo fallback to success.html).
-//
-// To enable real Stripe Checkout:
-//   1. Create products & Prices in your Stripe Dashboard, store the price IDs in artworks.
-//   2. Set STRIPE_PUBLIC_KEY below to your `pk_live_…` (or `pk_test_…`).
-//   3. Add <script src="https://js.stripe.com/v3/"></script> to cart.html.
-//   4. Uncomment the real `redirectToCheckout` block below.
-
 const STRIPE_PUBLIC_KEY = 'pk_test_REPLACE_ME';
 
 async function init() {
   const artworks = await loadArtworks();
   const root = document.getElementById('cart-root');
 
-  // Delegate clicks on the root so re-renders don't drop listeners.
   root.addEventListener('click', e => {
     const removeBtn = e.target.closest('.remove-btn');
-    if (removeBtn) {
-      removeFromCart(removeBtn.dataset.id);
-      render();
-      return;
-    }
-    if (e.target.closest('#checkout')) {
-      handleCheckout();
-    }
+    if (removeBtn) { removeFromCart(removeBtn.dataset.id); render(); return; }
+    if (e.target.closest('#checkout')) handleCheckout();
   });
 
   function render() {
     const ids = getCart();
     const items = ids.map(id => artworks.find(a => a.id === id)).filter(Boolean);
-
-    // Prune cart ids whose artwork was deleted in admin so the badge count
-    // stays in sync with the rendered list.
-    if (items.length !== ids.length) {
-      setCart(items.map(a => a.id));
-    }
+    if (items.length !== ids.length) setCart(items.map(a => a.id));
 
     if (!items.length) {
       root.innerHTML = `
         <div class="empty-state">
           <h2>Votre panier est vide</h2>
-          <p>Découvrez les œuvres disponibles dans la galerie.</p>
+          <p>Découvrez les œuvres dans la galerie.</p>
           <p style="margin-top:1.5rem;"><a class="btn" href="index.html">Voir la galerie</a></p>
         </div>`;
       return;
@@ -54,8 +34,7 @@ async function init() {
           <div class="cart-item">
             <a href="${artworkHref(a.id)}">
               <img src="${escapeHtml(thumb.url)}" alt="${escapeHtml(a.title)}"
-                   width="${thumb.width}" height="${thumb.height}"
-                   loading="lazy" decoding="async" />
+                   width="${thumb.width}" height="${thumb.height}" loading="lazy" decoding="async" />
             </a>
             <div>
               <h2><a href="${artworkHref(a.id)}">${escapeHtml(a.title)}</a></h2>
@@ -63,16 +42,23 @@ async function init() {
             </div>
             <div class="price">${formatPrice(a.price)}</div>
             <button class="remove-btn" data-id="${escapeHtml(a.id)}" aria-label="Retirer ${escapeHtml(a.title)}">Retirer</button>
-          </div>
-        `;
+          </div>`;
         }).join('')}
       </div>
       <div class="cart-summary">
         <div class="row"><span>Sous-total</span><span>${formatPrice(total)}</span></div>
         <div class="row"><span>Livraison</span><span>Offerte</span></div>
         <div class="row total"><span>Total</span><span>${formatPrice(total)}</span></div>
-        <button class="btn" id="checkout">Payer avec Stripe</button>
-        <p class="cart-note">Paiement sécurisé via Stripe. Mode démo activé sur ce prototype.</p>
+        <button class="btn btn-lg" id="checkout">Payer</button>
+        <div class="payment-methods">
+          <span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+            Carte bancaire
+          </span>
+          <span>·</span>
+          <span>TWINT</span>
+        </div>
+        <p class="cart-note">Paiement sécurisé. Mode démo sur ce prototype.</p>
       </div>
     `;
   }
@@ -82,11 +68,12 @@ async function init() {
       window.location.href = 'success.html?demo=1';
       return;
     }
-    // Real Stripe (uncomment after configuring):
+    // Stripe Checkout supports both card and TWINT via payment_method_types.
     // const stripe = Stripe(STRIPE_PUBLIC_KEY);
     // stripe.redirectToCheckout({
-    //   lineItems: getCart().map(id => ({ price: /* priceIdFor(id) */, quantity: 1 })),
+    //   lineItems: [...],
     //   mode: 'payment',
+    //   payment_method_types: ['card', 'twint'],
     //   successUrl: window.location.origin + '/success.html',
     //   cancelUrl: window.location.href,
     // });

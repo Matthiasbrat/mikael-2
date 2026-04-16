@@ -4,21 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mikael's Gallery — Life under a new angle</title>
-  <meta name="description" content="Galerie d'art de Mikael : peintures, photographies et œuvres originales. Life under a new angle." />
+  <meta name="description" content="Galerie d'art de Mikael : peintures, photographies et œuvres originales." />
   <meta property="og:title" content="Mikael's Gallery" />
   <meta property="og:description" content="Life under a new angle." />
   <meta property="og:type" content="website" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23161628'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Georgia,serif' font-size='34' font-weight='600' fill='%23fff'%3EM%3C/text%3E%3C/svg%3E" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232d1b69'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Georgia,serif' font-size='34' font-weight='600' fill='%23fff'%3EM%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <!-- LCP image preload: current best-seller hero featured (Crépuscule Pourpre @900w) -->
-  <link rel="preload" as="image" href="https://picsum.photos/seed/purple/900/1350" fetchpriority="high" />
-  <!-- Google Fonts made non-render-blocking via the print-media swap trick; the browser
-       downloads the stylesheet at low priority then swaps it in once loaded. Dropped
-       Playfair 500 and 700 (unused in CSS), keeping only 600. -->
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&display=swap" as="style" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&display=swap" media="print" onload="this.media='all'" />
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&display=swap" /></noscript>
+  <link rel="preload" as="image" href="https://picsum.photos/seed/purple/600/750" fetchpriority="high" />
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" as="style" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" /></noscript>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -26,30 +22,36 @@
 
   <main class="container">
     <section class="hero">
-      <div class="hero-text">
-        <h1>Mikael's Gallery</h1>
-        <p class="tagline">Life under a new angle.</p>
-        <p class="hero-meta">
-          <span>Œuvres originales</span>
-          <span>Édition limitée</span>
-          <span>Livraison offerte</span>
-        </p>
-      </div>
-      <div id="hero-featured"></div>
+      <h1>Mikael's Gallery</h1>
+      <p class="tagline">Life under a new angle.</p>
     </section>
 
-    <div class="filters" id="filters">
-      <button class="filter-btn active" data-cat="all">Tout</button>
-      <button class="filter-btn" data-cat="paysage">Paysage</button>
-      <button class="filter-btn" data-cat="abstrait">Abstrait</button>
-      <button class="filter-btn" data-cat="portrait">Portrait</button>
-      <button class="filter-btn" data-cat="nature">Nature</button>
-      <select id="sort" aria-label="Trier les œuvres">
-        <option value="recent">Ajouts récents</option>
-        <option value="bestseller">Plus vendus</option>
-        <option value="price-asc">Prix croissant</option>
-        <option value="price-desc">Prix décroissant</option>
-      </select>
+    <div class="filter-bar">
+      <div class="filter-toggles">
+        <button class="filter-toggle" data-panel="style">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>
+          Style
+        </button>
+        <button class="filter-toggle" data-panel="price">
+          Prix <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <button class="filter-toggle" data-panel="medium">
+          Medium <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="m6 9 6 6 6-6"/></svg>
+          <span class="count" style="display:none;"></span>
+        </button>
+        <select id="sort-select" style="margin-left:auto;padding:0.5rem 0.8rem;border:1px solid var(--border);border-radius:999px;font-size:0.82rem;background:var(--surface);color:var(--text);cursor:pointer;">
+          <option value="recent">Récents</option>
+          <option value="bestseller">Populaires</option>
+          <option value="price-asc">Prix ↑</option>
+          <option value="price-desc">Prix ↓</option>
+        </select>
+      </div>
+
+      <div class="filter-panel" data-panel="style"></div>
+      <div class="filter-panel" data-panel="price"></div>
+      <div class="filter-panel" data-panel="medium"></div>
+
+      <div id="active-filters" class="active-filters"></div>
     </div>
 
     <section class="gallery" id="gallery"></section>

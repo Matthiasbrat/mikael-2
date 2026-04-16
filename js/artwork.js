@@ -1,9 +1,3 @@
-// Artwork detail page: hero image, in-situ scene with adaptive frame, specs, similar.
-
-// Minimalist gallery-wall scene. No furniture — just a warm wall lit by a soft
-// spotlight from above, a thin floor strip, and the frame (positioned separately
-// by CSS) hovering in the lit area. Matches the sober brand better than a
-// cartoonish living room.
 const ROOM_SVG = `
 <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" class="room" aria-hidden="true">
   <defs>
@@ -43,15 +37,16 @@ async function init() {
         <h2>Œuvre introuvable</h2>
         <p style="margin-top:1rem;"><a class="btn" href="index.html">Retour à la galerie</a></p>
       </div>`;
+    root.setAttribute('aria-busy', 'false');
     return;
   }
 
   document.title = `${art.title} — Mikael's Gallery`;
-
-  // Main image is the LCP element on this page → fetchpriority high + decoding sync.
-  // In-situ frame is below the fold and small → lazy + async decode.
   const mainImg = imageAt(art.image, 1200);
   const situImg = imageAt(art.image, 500);
+  const liked = isLiked(art.id);
+  const isSold = art.status !== 'available';
+  const cat = art.category[0].toUpperCase() + art.category.slice(1);
 
   root.innerHTML = `
     <div class="artwork-media">
@@ -73,66 +68,71 @@ async function init() {
     </div>
     <div class="artwork-info">
       <div class="artwork-tags">
-        ${(art.tags || []).map(t => t === 'nouveau'
-          ? '<span class="badge">Nouveau</span>'
-          : t === 'best-seller'
-            ? '<span class="badge bestseller">Best-seller</span>'
-            : '').join(' ')}
+        ${(art.tags || []).includes('nouveau') ? '<span class="active-tag" style="font-size:0.72rem;">Nouveau</span>' : ''}
+        ${(art.tags || []).includes('best-seller') ? '<span class="active-tag" style="font-size:0.72rem;background:var(--accent);color:#fff;">Best-seller</span>' : ''}
       </div>
       <h1>${escapeHtml(art.title)}</h1>
-      <div class="meta">${escapeHtml(art.category[0].toUpperCase() + art.category.slice(1))} · ${art.year}</div>
+      <div class="meta">${escapeHtml(cat)} · ${escapeHtml(art.medium)} · ${art.year}</div>
       <p class="description">${escapeHtml(art.description)}</p>
       <ul class="specs">
         <li><span>Dimensions</span><span>${escapeHtml(art.dimensions)}</span></li>
         <li><span>Technique</span><span>${escapeHtml(art.technique)}</span></li>
         <li><span>Année</span><span>${art.year}</span></li>
-        <li><span>Disponibilité</span><span>${art.status === 'available' ? 'Disponible' : 'Vendue'}</span></li>
+        <li><span>Disponibilité</span><span style="color:${isSold ? 'var(--sold)' : 'var(--available)'}; font-weight:600;">${isSold ? 'Vendu' : 'Disponible'}</span></li>
       </ul>
       <div class="price-tag">${formatPrice(art.price)}</div>
-      <button class="btn" id="add-cart" ${art.status !== 'available' ? 'disabled' : ''}>
-        ${art.status === 'available' ? 'Ajouter au panier' : 'Vendue'}
-      </button>
+      <div class="artwork-actions">
+        <button class="btn btn-lg" id="add-cart" ${isSold ? 'disabled' : ''}>
+          ${isSold ? 'Vendu' : 'Ajouter au panier'}
+        </button>
+        <button class="heart-btn-lg${liked ? ' liked' : ''}" id="like-btn" aria-label="Ajouter aux favoris">
+          ${HEART_SVG}
+        </button>
+      </div>
     </div>
   `;
 
   root.setAttribute('aria-busy', 'false');
+
   document.getElementById('add-cart')?.addEventListener('click', () => addToCart(art.id));
 
-  // Adaptive frame sizing based on artwork aspect ratio.
+  document.getElementById('like-btn')?.addEventListener('click', function () {
+    const liked = toggleLike(art.id);
+    this.classList.toggle('liked', liked);
+    showToast(liked ? 'Ajouté aux favoris' : 'Retiré des favoris');
+  });
+
+  // Adaptive frame sizing
   const frameImg = root.querySelector('.in-situ .frame img');
   const frame = root.querySelector('.in-situ .frame');
   const sizeFrame = () => {
     if (!frameImg.naturalWidth) return;
     const ratio = frameImg.naturalWidth / frameImg.naturalHeight;
-    // Container aspect 4:3 (CW/CH = 4/3). Frame width w% and height h%
-    // satisfy h% = w% * (4/3) / ratio.
     const k = 4 / 3;
-    const maxW = 30;  // % of container width
-    const maxH = 56;  // % of container height
-    let w = maxW;
-    let h = w * k / ratio;
-    if (h > maxH) {
-      h = maxH;
-      w = h * ratio / k;
-    }
+    let w = 30, h = w * k / ratio;
+    if (h > 56) { h = 56; w = h * ratio / k; }
     frame.style.width = w + '%';
     frame.style.height = h + '%';
   };
-  if (frameImg.complete) sizeFrame();
-  else frameImg.addEventListener('load', sizeFrame);
+  if (frameImg.complete) sizeFrame(); else frameImg.addEventListener('load', sizeFrame);
 
   // Similar artworks
-  const similar = artworks
-    .filter(a => a.id !== art.id && a.category === art.category)
-    .slice(0, 4);
+  const similar = artworks.filter(a => a.id !== art.id && a.category === art.category).slice(0, 4);
   const similarRoot = document.getElementById('similar');
   if (similar.length) {
     similarRoot.innerHTML = `
       <h2>Œuvres similaires</h2>
-      <div class="gallery">
-        ${similar.map((a, i) => cardHTML(a, i)).join('')}
-      </div>
+      <div class="gallery">${similar.map((a, i) => cardHTML(a, i)).join('')}</div>
     `;
+    similarRoot.addEventListener('click', e => {
+      const heart = e.target.closest('.heart-btn');
+      if (heart) {
+        e.preventDefault();
+        e.stopPropagation();
+        const liked = toggleLike(heart.dataset.id);
+        heart.classList.toggle('liked', liked);
+      }
+    });
   }
 }
 
