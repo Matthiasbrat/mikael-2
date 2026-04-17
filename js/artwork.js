@@ -65,6 +65,10 @@ async function init() {
         </div>
       </div>
       <p class="in-situ-label" id="in-situ-label">Aperçu en situation</p>
+      <button class="btn btn-secondary" id="view-3d-btn" style="margin-top:0.75rem;width:100%;">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4.5v9L12 21l-9-4.5v-9L12 3z"/><path d="M12 12l9-4.5"/><path d="M12 12v9"/><path d="M12 12L3 7.5"/></svg>
+        Voir en 3D
+      </button>
     </div>
     <div class="artwork-info">
       <div class="artwork-tags">
@@ -115,6 +119,42 @@ async function init() {
     frame.style.height = h + '%';
   };
   if (frameImg.complete) sizeFrame(); else frameImg.addEventListener('load', sizeFrame);
+
+  // 3D viewer — lazy-loads Three.js only when user clicks
+  const viewerModal = document.createElement('div');
+  viewerModal.id = 'viewer-3d-modal';
+  viewerModal.className = 'viewer-modal hidden';
+  viewerModal.innerHTML = `
+    <div class="viewer-header">
+      <span>${escapeHtml(art.title)} — Vue 3D</span>
+      <button class="viewer-close" id="close-3d">&times;</button>
+    </div>
+    <div id="viewer-3d-canvas" class="viewer-canvas"></div>
+    <p class="viewer-hint">Glisser pour tourner · Scroll pour zoomer</p>
+  `;
+  document.body.appendChild(viewerModal);
+
+  let disposeViewer = null;
+
+  document.getElementById('view-3d-btn')?.addEventListener('click', async () => {
+    viewerModal.classList.remove('hidden');
+    if (!disposeViewer) {
+      try {
+        if (!window.init3DViewer) await import('./js/viewer3d.js');
+        const dims = art.dimensions.match(/(\d+)\s*[×x]\s*(\d+)/);
+        const w = dims ? +dims[1] : mainImg.width;
+        const h = dims ? +dims[2] : mainImg.height;
+        disposeViewer = window.init3DViewer('viewer-3d-canvas', mainImg.url, w, h);
+      } catch (err) {
+        document.getElementById('viewer-3d-canvas').innerHTML =
+          '<p style="color:#fff;text-align:center;padding:3rem;">Impossible de charger le viewer 3D.</p>';
+      }
+    }
+  });
+
+  document.getElementById('close-3d')?.addEventListener('click', () => {
+    viewerModal.classList.add('hidden');
+  });
 
   // Similar artworks
   const similar = artworks.filter(a => a.id !== art.id && a.category === art.category).slice(0, 4);

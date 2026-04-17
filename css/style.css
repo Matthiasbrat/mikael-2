@@ -595,6 +595,43 @@ main { padding-bottom: 5rem; }
   .modal-actions .btn { width: 100%; }
 }
 
+/* ---------- 3D Viewer Modal ---------- */
+.viewer-modal {
+  position: fixed; inset: 0; z-index: 1100;
+  background: rgba(0,0,0,0.88);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 1.5rem;
+}
+.viewer-modal.hidden { display: none; }
+.viewer-header {
+  display: flex; justify-content: space-between; align-items: center;
+  width: 100%; max-width: 800px;
+  color: #fff; font-size: 0.95rem; font-weight: 500;
+  margin-bottom: 0.75rem;
+}
+.viewer-close {
+  color: #fff; font-size: 1.6rem; padding: 0.4rem 0.6rem;
+  opacity: 0.7; transition: opacity 200ms;
+}
+.viewer-close:hover { opacity: 1; }
+.viewer-canvas {
+  width: 100%; max-width: 800px;
+  height: 60vh; max-height: 600px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #f0ebe3;
+}
+.viewer-hint {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.78rem; margin-top: 0.6rem;
+}
+@media (max-width: 600px) {
+  .viewer-modal { padding: 0.75rem; }
+  .viewer-canvas { height: 50vh; border-radius: var(--radius); }
+  .viewer-header { font-size: 0.85rem; }
+}
+
 /* ---------- Toast ---------- */
 .toast {
   position: fixed; bottom: 2rem; left: 50%;
