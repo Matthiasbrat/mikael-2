@@ -1,3 +1,14 @@
+function loadScriptOnce(src) {
+  return new Promise(function (resolve, reject) {
+    if (document.querySelector('script[src="' + src + '"]')) { resolve(); return; }
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = function () { reject(new Error('Failed to load: ' + src)); };
+    document.head.appendChild(s);
+  });
+}
+
 const ROOM_SVG = `
 <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" class="room" aria-hidden="true">
   <defs>
@@ -140,17 +151,17 @@ async function init() {
     viewerModal.classList.remove('hidden');
     if (!disposeViewer) {
       try {
-        if (!window.init3DViewer) {
-          const viewerUrl = new URL('js/viewer3d.js', document.baseURI).href;
-          await import(viewerUrl);
-        }
-        const dims = art.dimensions.match(/(\d+)\s*[×x]\s*(\d+)/);
-        const w = dims ? +dims[1] : mainImg.width;
-        const h = dims ? +dims[2] : mainImg.height;
+        // Load Three.js + viewer as classic scripts (no ES modules, works everywhere)
+        await loadScriptOnce('https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.min.js');
+        await loadScriptOnce(new URL('js/viewer3d.js', document.baseURI).href);
+        var dims = art.dimensions.match(/(\d+)\s*[×x]\s*(\d+)/);
+        var w = dims ? +dims[1] : mainImg.width;
+        var h = dims ? +dims[2] : mainImg.height;
         disposeViewer = window.init3DViewer('viewer-3d-canvas', mainImg.url, w, h);
       } catch (err) {
+        console.error('3D viewer error:', err);
         document.getElementById('viewer-3d-canvas').innerHTML =
-          '<p style="color:#fff;text-align:center;padding:3rem;">Impossible de charger le viewer 3D.</p>';
+          '<p style="color:#fff;text-align:center;padding:3rem;">Impossible de charger le viewer 3D.<br><small>' + escapeHtml(String(err.message || err)) + '</small></p>';
       }
     }
   });
