@@ -44,9 +44,7 @@ window.init3DViewer = function (containerId, imageUrl, artW, artH) {
   var loader = new THREE.TextureLoader();
   loader.crossOrigin = 'anonymous';
 
-  var textureUrl = imageUrl + (imageUrl.indexOf('?') >= 0 ? '&' : '?') + 'webgl=1';
-
-  loader.load(textureUrl, function (texture) {
+  loader.load(imageUrl, function (texture) {
     texture.colorSpace = THREE.SRGBColorSpace;
 
     var ratio = artW / artH;
@@ -102,7 +100,7 @@ window.init3DViewer = function (containerId, imageUrl, artW, artH) {
   canvas.addEventListener('pointermove', function (e) {
     if (!isDragging) return;
     group.rotation.y += (e.clientX - prevX) * 0.008;
-    group.rotation.x += (e.clientY - prevY) * 0.006;
+    group.rotation.x -= (e.clientY - prevY) * 0.006;
     group.rotation.x = Math.max(-0.7, Math.min(0.7, group.rotation.x));
     prevX = e.clientX;
     prevY = e.clientY;

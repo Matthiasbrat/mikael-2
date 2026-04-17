@@ -65,6 +65,7 @@ async function init() {
       <div class="main-image">
         <img src="${escapeHtml(mainImg.url)}" alt="${escapeHtml(art.title)}"
              width="${mainImg.width}" height="${mainImg.height}"
+             crossorigin="anonymous"
              fetchpriority="high" decoding="sync" />
       </div>
       <div class="in-situ" role="group" aria-labelledby="in-situ-label">
