@@ -140,7 +140,10 @@ async function init() {
     viewerModal.classList.remove('hidden');
     if (!disposeViewer) {
       try {
-        if (!window.init3DViewer) await import('./js/viewer3d.js');
+        if (!window.init3DViewer) {
+          const viewerUrl = new URL('js/viewer3d.js', document.baseURI).href;
+          await import(viewerUrl);
+        }
         const dims = art.dimensions.match(/(\d+)\s*[×x]\s*(\d+)/);
         const w = dims ? +dims[1] : mainImg.width;
         const h = dims ? +dims[2] : mainImg.height;

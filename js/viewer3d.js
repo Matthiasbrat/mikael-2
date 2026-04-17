@@ -1,8 +1,8 @@
 // js/viewer3d.js — ES module, lazy-loaded via dynamic import() when user clicks "Voir en 3D".
 // Three.js is fetched from CDN only at that point (~600 KB), not on initial page load.
 
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js';
 
 window.init3DViewer = function (containerId, imageUrl, artW, artH) {
   const container = document.getElementById(containerId);
