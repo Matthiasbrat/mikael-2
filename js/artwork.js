@@ -152,7 +152,7 @@ async function init() {
     if (!disposeViewer) {
       try {
         // Load Three.js + viewer as classic scripts (no ES modules, works everywhere)
-        await loadScriptOnce('https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.min.js');
+        await loadScriptOnce(new URL('lib/three.min.js', document.baseURI).href);
         await loadScriptOnce(new URL('js/viewer3d.js', document.baseURI).href);
         var dims = art.dimensions.match(/(\d+)\s*[×x]\s*(\d+)/);
         var w = dims ? +dims[1] : mainImg.width;
