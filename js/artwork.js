@@ -154,7 +154,7 @@ async function init() {
       try {
         // Load Three.js + viewer as classic scripts (no ES modules, works everywhere)
         await loadScriptOnce(new URL('lib/three.min.js', document.baseURI).href);
-        await loadScriptOnce(new URL('js/viewer3d.js', document.baseURI).href);
+        await loadScriptOnce(new URL('js/viewer3d.js', document.baseURI).href + '?t=' + Date.now());
         var dims = art.dimensions.match(/(\d+)\s*[×x]\s*(\d+)/);
         var w = dims ? +dims[1] : mainImg.width;
         var h = dims ? +dims[2] : mainImg.height;
