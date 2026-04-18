@@ -338,27 +338,19 @@ main { padding-bottom: 5rem; }
 .artwork-actions .heart-btn-lg.liked { background: var(--heart-bg); border-color: var(--heart); }
 .artwork-actions .heart-btn-lg.liked svg { fill: var(--heart); stroke: var(--heart); }
 
-/* In-situ */
-.in-situ {
-  margin-top: 1.25rem; border-radius: var(--radius); overflow: hidden;
-  position: relative; aspect-ratio: 4/3; box-shadow: var(--shadow-md); background: #f3ede1;
+/* Inline 3D viewer (replaces in-situ) */
+.viewer-inline {
+  margin-top: 1rem; border-radius: var(--radius-lg); overflow: hidden;
+  aspect-ratio: 4/3; background: #f0ebe3; box-shadow: var(--shadow-md);
 }
-.in-situ .room { position: absolute; inset: 0; width: 100%; height: 100%; }
-.in-situ .frame {
-  position: absolute; left: 50%; top: 8%; width: 30%; height: 30%;
-  transform: translateX(-50%); padding: 6px; background: #fff;
-  border: 1px solid rgba(0,0,0,0.05);
-  box-shadow: 0 18px 30px rgba(0,0,0,0.22), 0 6px 12px rgba(0,0,0,0.12);
+.viewer-inline canvas { display: block; width: 100%; height: 100%; }
+.viewer-loading {
+  display: flex; align-items: center; justify-content: center;
+  height: 100%; color: var(--muted); font-size: 0.88rem;
 }
-.in-situ .frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.in-situ .frame::after {
-  content: ''; position: absolute; left: -10%; right: -10%; bottom: -16px; height: 24px;
-  background: radial-gradient(ellipse at center, rgba(0,0,0,0.18), transparent 70%);
-  z-index: -1; filter: blur(2px);
-}
-.in-situ-label {
+.viewer-hint-inline {
   font-size: 0.72rem; color: var(--muted); text-align: center;
-  margin-top: 0.5rem; text-transform: uppercase; letter-spacing: 0.12em;
+  margin-top: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em;
 }
 
 .similar { margin-top: 4rem; }
@@ -593,43 +585,6 @@ main { padding-bottom: 5rem; }
   .modal .form-row input[type="file"] { font-size: 0.82rem; }
   .modal-actions { flex-direction: column; }
   .modal-actions .btn { width: 100%; }
-}
-
-/* ---------- 3D Viewer Modal ---------- */
-.viewer-modal {
-  position: fixed; inset: 0; z-index: 1100;
-  background: rgba(0,0,0,0.88);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 1.5rem;
-}
-.viewer-modal.hidden { display: none; }
-.viewer-header {
-  display: flex; justify-content: space-between; align-items: center;
-  width: 100%; max-width: 800px;
-  color: #fff; font-size: 0.95rem; font-weight: 500;
-  margin-bottom: 0.75rem;
-}
-.viewer-close {
-  color: #fff; font-size: 1.6rem; padding: 0.4rem 0.6rem;
-  opacity: 0.7; transition: opacity 200ms;
-}
-.viewer-close:hover { opacity: 1; }
-.viewer-canvas {
-  width: 100%; max-width: 800px;
-  height: 60vh; max-height: 600px;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  background: #f0ebe3;
-}
-.viewer-hint {
-  color: rgba(255,255,255,0.5);
-  font-size: 0.78rem; margin-top: 0.6rem;
-}
-@media (max-width: 600px) {
-  .viewer-modal { padding: 0.75rem; }
-  .viewer-canvas { height: 50vh; border-radius: var(--radius); }
-  .viewer-header { font-size: 0.85rem; }
 }
 
 /* ---------- Toast ---------- */
