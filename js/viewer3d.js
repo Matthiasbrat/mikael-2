@@ -29,10 +29,9 @@ window.init3DViewer = function (containerId, imageUrl, artW, artH) {
   scene.add(group);
 
   // Wall
-  scene.add(Object.assign(
-    new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.MeshBasicMaterial({ color: 0xede6d8 })),
-    { position: new THREE.Vector3(0, 0, -0.6) }
-  ));
+  var wall = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.MeshBasicMaterial({ color: 0xede6d8 }));
+  wall.position.z = -0.6;
+  scene.add(wall);
 
   function buildPainting(texture) {
     var ratio = artW / artH;
