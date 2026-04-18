@@ -80,7 +80,7 @@ window.init3DViewer = function (containerId, imageUrl, artW, artH) {
   canvas.addEventListener('pointermove', function (e) {
     if (!dragging) return;
     mesh.rotation.y += (e.clientX - px) * 0.01;
-    mesh.rotation.x -= (e.clientY - py) * 0.01;
+    mesh.rotation.x += (e.clientY - py) * 0.01;
     mesh.rotation.x = Math.max(-1, Math.min(1, mesh.rotation.x));
     px = e.clientX;
     py = e.clientY;
