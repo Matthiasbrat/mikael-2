@@ -65,20 +65,25 @@ window.init3DViewer = function (containerId, imageUrl, artW, artH) {
   // Auto-rotate until user interacts
   var autoRotate = true;
 
-  // Drag
+  // Drag — only with exactly 1 finger (2+ fingers = pinch zoom, no rotation)
   var canvas = renderer.domElement;
   canvas.style.touchAction = 'none';
-  var dragging = false, px = 0, py = 0;
+  var dragging = false, px = 0, py = 0, pointerCount = 0;
 
   canvas.addEventListener('pointerdown', function (e) {
+    pointerCount++;
     autoRotate = false;
-    dragging = true;
-    px = e.clientX;
-    py = e.clientY;
+    if (pointerCount === 1) {
+      dragging = true;
+      px = e.clientX;
+      py = e.clientY;
+    } else {
+      dragging = false;
+    }
     canvas.setPointerCapture(e.pointerId);
   });
   canvas.addEventListener('pointermove', function (e) {
-    if (!dragging) return;
+    if (!dragging || pointerCount !== 1) return;
     mesh.rotation.y += (e.clientX - px) * 0.01;
     mesh.rotation.x += (e.clientY - py) * 0.01;
     mesh.rotation.x = Math.max(-1, Math.min(1, mesh.rotation.x));
@@ -86,7 +91,13 @@ window.init3DViewer = function (containerId, imageUrl, artW, artH) {
     py = e.clientY;
   });
   canvas.addEventListener('pointerup', function (e) {
-    dragging = false;
+    pointerCount = Math.max(0, pointerCount - 1);
+    if (pointerCount === 0) dragging = false;
+    canvas.releasePointerCapture(e.pointerId);
+  });
+  canvas.addEventListener('pointercancel', function (e) {
+    pointerCount = Math.max(0, pointerCount - 1);
+    if (pointerCount === 0) dragging = false;
     canvas.releasePointerCapture(e.pointerId);
   });
 
