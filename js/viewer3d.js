@@ -1,4 +1,4 @@
-// js/viewer3d.js — Classic script. Expects window.THREE (UMD build).
+// js/viewer3d.js — Classic script. Expects window.THREE (UMD r159).
 
 window.init3DViewer = function (containerId, imageUrl, artW, artH) {
   var container = document.getElementById(containerId);
@@ -19,27 +19,19 @@ window.init3DViewer = function (containerId, imageUrl, artW, artH) {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.2;
-  if (renderer.outputColorSpace) renderer.outputColorSpace = THREE.SRGBColorSpace;
-  else if ('outputEncoding' in renderer) renderer.outputEncoding = THREE.sRGBEncoding;
   container.appendChild(renderer.domElement);
 
-  // Lighting
-  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.7));
   var dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
   dirLight.position.set(3, 4, 5);
   dirLight.castShadow = true;
   dirLight.shadow.mapSize.set(1024, 1024);
   scene.add(dirLight);
-  scene.add(new THREE.HemisphereLight(0xfff5e6, 0xd4c8b0, 0.3));
 
-  // Group holds painting + frame — we rotate this, not the camera
   var group = new THREE.Group();
   group.rotation.set(0, 0.3, 0);
   scene.add(group);
 
-  // Wall behind (catches shadows)
   var wall = new THREE.Mesh(
     new THREE.PlaneGeometry(8, 8),
     new THREE.MeshStandardMaterial({ color: 0xede6d8, roughness: 1 })
@@ -48,59 +40,64 @@ window.init3DViewer = function (containerId, imageUrl, artW, artH) {
   wall.receiveShadow = true;
   scene.add(wall);
 
-  // Load texture via fetch → blob → objectURL to completely bypass HTTP cache.
-  // Picsum redirects (picsum.photos → fastly.picsum.photos) land at the same
-  // final URL regardless of query params, so timestamp cache-busting on the
-  // initial URL doesn't prevent the browser from serving a cached non-CORS
-  // redirect target. Fetching as a blob sidesteps this entirely.
+  function buildPainting(texture) {
+    var ratio = artW / artH;
+    var maxDim = 1.8;
+    var pw = ratio >= 1 ? maxDim : maxDim * ratio;
+    var ph = ratio >= 1 ? maxDim / ratio : maxDim;
+    var depth = Math.max(pw, ph) * 0.04;
+
+    var frontMat = new THREE.MeshStandardMaterial({ map: texture });
+    var sideMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e6 });
+    var backMat = new THREE.MeshStandardMaterial({ color: 0xe5ddd0 });
+    var painting = new THREE.Mesh(
+      new THREE.BoxGeometry(pw, ph, depth),
+      [sideMat, sideMat, sideMat, sideMat, frontMat, backMat]
+    );
+    painting.castShadow = true;
+    group.add(painting);
+
+    var border = 0.05;
+    var frame = new THREE.Mesh(
+      new THREE.BoxGeometry(pw + border * 2, ph + border * 2, depth + 0.02),
+      new THREE.MeshStandardMaterial({ color: 0x1a1612, roughness: 0.5, metalness: 0.1 })
+    );
+    frame.position.z = -0.005;
+    frame.castShadow = true;
+    group.add(frame);
+  }
+
+  // Strategy: fetch image as blob → create blob URL (same-origin) →
+  // load via Three.js TextureLoader (handles all GPU upload internals).
+  // This avoids ALL CORS/cache issues because blob URLs are same-origin.
   fetch(imageUrl, { mode: 'cors' })
-    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.blob(); })
-    .then(function (blob) {
-      var objectUrl = URL.createObjectURL(blob);
-      var img = new Image();
-      img.onload = function () {
-        var texture = new THREE.Texture(img);
-        texture.needsUpdate = true;
-        if (THREE.SRGBColorSpace) texture.colorSpace = THREE.SRGBColorSpace;
-        else if (THREE.sRGBEncoding) texture.encoding = THREE.sRGBEncoding;
-
-        var ratio = artW / artH;
-        var maxDim = 1.8;
-        var pw = ratio >= 1 ? maxDim : maxDim * ratio;
-        var ph = ratio >= 1 ? maxDim / ratio : maxDim;
-        var depth = Math.max(pw, ph) * 0.04;
-
-        var frontMat = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.35 });
-        var sideMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e6, roughness: 0.85 });
-        var backMat = new THREE.MeshStandardMaterial({ color: 0xe5ddd0, roughness: 0.9 });
-        var painting = new THREE.Mesh(
-          new THREE.BoxGeometry(pw, ph, depth),
-          [sideMat, sideMat, sideMat, sideMat, frontMat, backMat]
-        );
-        painting.castShadow = true;
-        group.add(painting);
-
-        var border = 0.05;
-        var frame = new THREE.Mesh(
-          new THREE.BoxGeometry(pw + border * 2, ph + border * 2, depth + 0.02),
-          new THREE.MeshStandardMaterial({ color: 0x1a1612, roughness: 0.5, metalness: 0.1 })
-        );
-        frame.position.z = -0.005;
-        frame.castShadow = true;
-        group.add(frame);
-
-        URL.revokeObjectURL(objectUrl);
-      };
-      img.src = objectUrl;
+    .then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.blob();
     })
-    .catch(function () {
-      container.innerHTML = '<p style="color:var(--text);text-align:center;padding:3rem;">Impossible de charger la texture.</p>';
+    .then(function (blob) {
+      var blobUrl = URL.createObjectURL(blob);
+      var texLoader = new THREE.TextureLoader();
+      texLoader.load(
+        blobUrl,
+        function (texture) {
+          buildPainting(texture);
+          setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 2000);
+        },
+        undefined,
+        function () {
+          container.innerHTML = '<p style="text-align:center;padding:3rem;color:var(--text);">Erreur de texture.</p>';
+        }
+      );
+    })
+    .catch(function (err) {
+      container.innerHTML = '<p style="text-align:center;padding:3rem;color:var(--text);">Impossible de charger l\'image.<br><small>' + String(err) + '</small></p>';
     });
 
-  // Pointer controls — rotate the GROUP
-  // Drag RIGHT → painting turns right: rotation.y += dx ✓
-  // Drag UP → see painting top: rotation.x += dy (dy is negative when dragging up,
-  //   so rotation.x decreases → top goes away from camera → reveals top) ✓
+  // Pointer controls
+  // Drag RIGHT → group.rotation.y increases → painting turns right ✓
+  // Drag UP → screen dy is NEGATIVE → rotation.x -= negative → rotation.x INCREASES
+  //   → top of painting tilts toward camera → "follow finger" convention ✓
   var canvas = renderer.domElement;
   canvas.style.touchAction = 'none';
   var isDragging = false, prevX = 0, prevY = 0;
@@ -116,7 +113,7 @@ window.init3DViewer = function (containerId, imageUrl, artW, artH) {
     var dx = e.clientX - prevX;
     var dy = e.clientY - prevY;
     group.rotation.y += dx * 0.008;
-    group.rotation.x += dy * 0.006;
+    group.rotation.x -= dy * 0.006;
     group.rotation.x = Math.max(-0.7, Math.min(0.7, group.rotation.x));
     prevX = e.clientX;
     prevY = e.clientY;
@@ -135,16 +132,14 @@ window.init3DViewer = function (containerId, imageUrl, artW, artH) {
   var lastPinchDist = 0;
   canvas.addEventListener('touchstart', function (e) {
     if (e.touches.length === 2) {
-      var tdx = e.touches[0].clientX - e.touches[1].clientX;
-      var tdy = e.touches[0].clientY - e.touches[1].clientY;
-      lastPinchDist = Math.sqrt(tdx * tdx + tdy * tdy);
+      var a = e.touches[0], b = e.touches[1];
+      lastPinchDist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
     }
   }, { passive: true });
   canvas.addEventListener('touchmove', function (e) {
     if (e.touches.length === 2) {
-      var tdx = e.touches[0].clientX - e.touches[1].clientX;
-      var tdy = e.touches[0].clientY - e.touches[1].clientY;
-      var dist = Math.sqrt(tdx * tdx + tdy * tdy);
+      var a = e.touches[0], b = e.touches[1];
+      var dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
       camera.position.z = Math.max(1.5, Math.min(5, camera.position.z - (dist - lastPinchDist) * 0.008));
       lastPinchDist = dist;
       camera.lookAt(0, 0, 0);
