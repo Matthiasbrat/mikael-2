@@ -48,46 +48,54 @@ window.init3DViewer = function (containerId, imageUrl, artW, artH) {
   wall.receiveShadow = true;
   scene.add(wall);
 
-  // Load texture via a fresh Image element with a cache-busting timestamp
-  // so it NEVER hits a non-CORS cached entry from the page's <img> tags.
-  var img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = function () {
-    var texture = new THREE.Texture(img);
-    texture.needsUpdate = true;
-    if (THREE.SRGBColorSpace) texture.colorSpace = THREE.SRGBColorSpace;
-    else if (THREE.sRGBEncoding) texture.encoding = THREE.sRGBEncoding;
+  // Load texture via fetch → blob → objectURL to completely bypass HTTP cache.
+  // Picsum redirects (picsum.photos → fastly.picsum.photos) land at the same
+  // final URL regardless of query params, so timestamp cache-busting on the
+  // initial URL doesn't prevent the browser from serving a cached non-CORS
+  // redirect target. Fetching as a blob sidesteps this entirely.
+  fetch(imageUrl, { mode: 'cors' })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.blob(); })
+    .then(function (blob) {
+      var objectUrl = URL.createObjectURL(blob);
+      var img = new Image();
+      img.onload = function () {
+        var texture = new THREE.Texture(img);
+        texture.needsUpdate = true;
+        if (THREE.SRGBColorSpace) texture.colorSpace = THREE.SRGBColorSpace;
+        else if (THREE.sRGBEncoding) texture.encoding = THREE.sRGBEncoding;
 
-    var ratio = artW / artH;
-    var maxDim = 1.8;
-    var pw = ratio >= 1 ? maxDim : maxDim * ratio;
-    var ph = ratio >= 1 ? maxDim / ratio : maxDim;
-    var depth = Math.max(pw, ph) * 0.04;
+        var ratio = artW / artH;
+        var maxDim = 1.8;
+        var pw = ratio >= 1 ? maxDim : maxDim * ratio;
+        var ph = ratio >= 1 ? maxDim / ratio : maxDim;
+        var depth = Math.max(pw, ph) * 0.04;
 
-    var frontMat = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.35 });
-    var sideMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e6, roughness: 0.85 });
-    var backMat = new THREE.MeshStandardMaterial({ color: 0xe5ddd0, roughness: 0.9 });
-    var painting = new THREE.Mesh(
-      new THREE.BoxGeometry(pw, ph, depth),
-      [sideMat, sideMat, sideMat, sideMat, frontMat, backMat]
-    );
-    painting.castShadow = true;
-    group.add(painting);
+        var frontMat = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.35 });
+        var sideMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e6, roughness: 0.85 });
+        var backMat = new THREE.MeshStandardMaterial({ color: 0xe5ddd0, roughness: 0.9 });
+        var painting = new THREE.Mesh(
+          new THREE.BoxGeometry(pw, ph, depth),
+          [sideMat, sideMat, sideMat, sideMat, frontMat, backMat]
+        );
+        painting.castShadow = true;
+        group.add(painting);
 
-    var border = 0.05;
-    var frame = new THREE.Mesh(
-      new THREE.BoxGeometry(pw + border * 2, ph + border * 2, depth + 0.02),
-      new THREE.MeshStandardMaterial({ color: 0x1a1612, roughness: 0.5, metalness: 0.1 })
-    );
-    frame.position.z = -0.005;
-    frame.castShadow = true;
-    group.add(frame);
-  };
-  img.onerror = function () {
-    container.innerHTML = '<p style="color:var(--text);text-align:center;padding:3rem;">Impossible de charger la texture.</p>';
-  };
-  // Timestamp forces a fresh network request, bypassing any cached non-CORS entry
-  img.src = imageUrl + (imageUrl.indexOf('?') >= 0 ? '&' : '?') + '_=' + Date.now();
+        var border = 0.05;
+        var frame = new THREE.Mesh(
+          new THREE.BoxGeometry(pw + border * 2, ph + border * 2, depth + 0.02),
+          new THREE.MeshStandardMaterial({ color: 0x1a1612, roughness: 0.5, metalness: 0.1 })
+        );
+        frame.position.z = -0.005;
+        frame.castShadow = true;
+        group.add(frame);
+
+        URL.revokeObjectURL(objectUrl);
+      };
+      img.src = objectUrl;
+    })
+    .catch(function () {
+      container.innerHTML = '<p style="color:var(--text);text-align:center;padding:3rem;">Impossible de charger la texture.</p>';
+    });
 
   // Pointer controls — rotate the GROUP
   // Drag RIGHT → painting turns right: rotation.y += dx ✓
