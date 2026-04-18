@@ -8,7 +8,34 @@ window.init3DViewer = function (containerId, imageUrl, artW, artH) {
   var h = container.clientHeight || w * 0.75;
 
   var scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xeeeeee);
+
+  // Living room wall background — warm gradient via a canvas
+  var bgCvs = document.createElement('canvas');
+  bgCvs.width = 512;
+  bgCvs.height = 512;
+  var bgCtx = bgCvs.getContext('2d');
+  // Wall
+  var wallGrad = bgCtx.createLinearGradient(0, 0, 0, 400);
+  wallGrad.addColorStop(0, '#f0e8da');
+  wallGrad.addColorStop(1, '#e2d5c0');
+  bgCtx.fillStyle = wallGrad;
+  bgCtx.fillRect(0, 0, 512, 400);
+  // Baseboard
+  bgCtx.fillStyle = '#d8cbb4';
+  bgCtx.fillRect(0, 395, 512, 8);
+  // Floor
+  var floorGrad = bgCtx.createLinearGradient(0, 400, 0, 512);
+  floorGrad.addColorStop(0, '#b8a68a');
+  floorGrad.addColorStop(1, '#8c7a5e');
+  bgCtx.fillStyle = floorGrad;
+  bgCtx.fillRect(0, 403, 512, 109);
+  // Subtle wall panel lines
+  bgCtx.strokeStyle = 'rgba(0,0,0,0.04)';
+  bgCtx.lineWidth = 1;
+  [128, 256, 384].forEach(function (x) {
+    bgCtx.beginPath(); bgCtx.moveTo(x, 0); bgCtx.lineTo(x, 395); bgCtx.stroke();
+  });
+  scene.background = new THREE.CanvasTexture(bgCvs);
 
   var camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 100);
   camera.position.set(0, 0, 2.5);
