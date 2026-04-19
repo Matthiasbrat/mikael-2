@@ -53,7 +53,7 @@ window.init3DViewer = function (containerId, imageUrl, artW, artH) {
   var cvs = document.createElement('canvas');
   cvs.width = 512;
   cvs.height = Math.round(512 * (artH / artW)) || 512;
-  var ctx = cvs.getContext('2d');
+  var ctx = cvs.getContext('2d', { willReadFrequently: true });
   var imageOk = false;
 
   var pageImg = document.querySelector('.main-image img');
@@ -80,6 +80,10 @@ window.init3DViewer = function (containerId, imageUrl, artW, artH) {
   }
 
   var texture = new THREE.CanvasTexture(cvs);
+  if (THREE.SRGBColorSpace) {
+    texture.colorSpace = THREE.SRGBColorSpace;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+  }
 
   // Box with texture on ALL faces — single material, no array
   var ratio = artW / artH;
