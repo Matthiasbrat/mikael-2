@@ -7,6 +7,9 @@ window.init3DViewer = function (containerId, imageUrl, artW, artH) {
   var w = container.clientWidth;
   var h = container.clientHeight || w * 0.75;
 
+  // Clear loading text before inserting the canvas
+  container.innerHTML = '';
+
   var scene = new THREE.Scene();
 
   // Living room wall background — warm gradient via a canvas
