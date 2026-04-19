@@ -12,32 +12,92 @@ window.init3DViewer = function (containerId, imageUrl, artW, artH) {
 
   var scene = new THREE.Scene();
 
-  // Living room wall background — warm gradient via a canvas
+  // Sophisticated room background — paneled wall with molding, like Singulart
   var bgCvs = document.createElement('canvas');
-  bgCvs.width = 512;
-  bgCvs.height = 512;
-  var bgCtx = bgCvs.getContext('2d');
-  // Wall
-  var wallGrad = bgCtx.createLinearGradient(0, 0, 0, 400);
-  wallGrad.addColorStop(0, '#f0e8da');
-  wallGrad.addColorStop(1, '#e2d5c0');
-  bgCtx.fillStyle = wallGrad;
-  bgCtx.fillRect(0, 0, 512, 400);
+  bgCvs.width = 1024;
+  bgCvs.height = 768;
+  var bg = bgCvs.getContext('2d');
+
+  // Wall base — warm gray-beige
+  var wallGrad = bg.createLinearGradient(0, 0, 0, 590);
+  wallGrad.addColorStop(0, '#cec5b4');
+  wallGrad.addColorStop(0.4, '#c5bcab');
+  wallGrad.addColorStop(1, '#bbb2a1');
+  bg.fillStyle = wallGrad;
+  bg.fillRect(0, 0, 1024, 590);
+
+  // Crown molding (top)
+  bg.fillStyle = '#b8af9e';
+  bg.fillRect(0, 0, 1024, 18);
+  bg.fillStyle = 'rgba(255,255,255,0.12)';
+  bg.fillRect(0, 18, 1024, 2);
+  bg.fillStyle = 'rgba(0,0,0,0.06)';
+  bg.fillRect(0, 20, 1024, 1);
+  bg.fillStyle = '#c0b7a6';
+  bg.fillRect(0, 21, 1024, 6);
+  bg.fillStyle = 'rgba(0,0,0,0.04)';
+  bg.fillRect(0, 27, 1024, 1);
+
+  // Panel moldings — 3 beveled raised panels
+  function drawPanel(x, y, w, h) {
+    // Outer bevel — light on top-left, shadow on bottom-right
+    bg.lineWidth = 1.5;
+    bg.strokeStyle = 'rgba(255,255,255,0.18)';
+    bg.beginPath();
+    bg.moveTo(x, y + h); bg.lineTo(x, y); bg.lineTo(x + w, y);
+    bg.stroke();
+    bg.strokeStyle = 'rgba(0,0,0,0.1)';
+    bg.beginPath();
+    bg.moveTo(x + w, y); bg.lineTo(x + w, y + h); bg.lineTo(x, y + h);
+    bg.stroke();
+    // Inner bevel (reverse — creates depth)
+    var i = 6;
+    bg.strokeStyle = 'rgba(0,0,0,0.06)';
+    bg.beginPath();
+    bg.moveTo(x + i, y + h - i); bg.lineTo(x + i, y + i); bg.lineTo(x + w - i, y + i);
+    bg.stroke();
+    bg.strokeStyle = 'rgba(255,255,255,0.1)';
+    bg.beginPath();
+    bg.moveTo(x + w - i, y + i); bg.lineTo(x + w - i, y + h - i); bg.lineTo(x + i, y + h - i);
+    bg.stroke();
+  }
+
+  var pw = 270, ph = 460, py = 60;
+  var gap = (1024 - pw * 3) / 4;
+  drawPanel(gap, py, pw, ph);
+  drawPanel(gap * 2 + pw, py, pw, ph);
+  drawPanel(gap * 3 + pw * 2, py, pw, ph);
+
+  // Chair rail / dado (horizontal molding below panels)
+  bg.fillStyle = '#b5ac9b';
+  bg.fillRect(0, py + ph + 16, 1024, 8);
+  bg.fillStyle = 'rgba(255,255,255,0.1)';
+  bg.fillRect(0, py + ph + 16, 1024, 1);
+  bg.fillStyle = 'rgba(0,0,0,0.05)';
+  bg.fillRect(0, py + ph + 24, 1024, 1);
+
   // Baseboard
-  bgCtx.fillStyle = '#d8cbb4';
-  bgCtx.fillRect(0, 395, 512, 8);
-  // Floor
-  var floorGrad = bgCtx.createLinearGradient(0, 400, 0, 512);
-  floorGrad.addColorStop(0, '#b8a68a');
-  floorGrad.addColorStop(1, '#8c7a5e');
-  bgCtx.fillStyle = floorGrad;
-  bgCtx.fillRect(0, 403, 512, 109);
-  // Subtle wall panel lines
-  bgCtx.strokeStyle = 'rgba(0,0,0,0.04)';
-  bgCtx.lineWidth = 1;
-  [128, 256, 384].forEach(function (x) {
-    bgCtx.beginPath(); bgCtx.moveTo(x, 0); bgCtx.lineTo(x, 395); bgCtx.stroke();
+  bg.fillStyle = '#ada494';
+  bg.fillRect(0, 575, 1024, 16);
+  bg.fillStyle = 'rgba(255,255,255,0.12)';
+  bg.fillRect(0, 575, 1024, 1.5);
+  bg.fillStyle = 'rgba(0,0,0,0.06)';
+  bg.fillRect(0, 590, 1024, 1);
+
+  // Floor — warm wood
+  var floorGrad = bg.createLinearGradient(0, 591, 0, 768);
+  floorGrad.addColorStop(0, '#9e8c72');
+  floorGrad.addColorStop(0.5, '#8a7a62');
+  floorGrad.addColorStop(1, '#766a54');
+  bg.fillStyle = floorGrad;
+  bg.fillRect(0, 591, 1024, 177);
+  // Floor planks
+  bg.strokeStyle = 'rgba(0,0,0,0.06)';
+  bg.lineWidth = 1;
+  [640, 690, 740].forEach(function (y) {
+    bg.beginPath(); bg.moveTo(0, y); bg.lineTo(1024, y); bg.stroke();
   });
+
   scene.background = new THREE.CanvasTexture(bgCvs);
 
   var camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 100);
